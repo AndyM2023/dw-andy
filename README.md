@@ -1,4 +1,4 @@
-# Plataforma web para la Gestión de Poryectos con Visualización de Datos
+# Plataforma web para la Gestión de Proyectos con Visualización de Datos
 
 
 Características del Proyecto
