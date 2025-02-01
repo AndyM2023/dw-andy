@@ -1,42 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useContext, useState } from 'react';
 import { Route, Routes, Navigate } from 'react-router-dom';
+import { AuthContext } from './context/AuthContext';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import Home from './pages/Home';
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { isAuthenticated, login } = useContext(AuthContext); // ✅ Asegúrate de obtener `login`
   const [isLogin, setIsLogin] = useState(true);
-
-  useEffect(() => {
-    const token = localStorage.getItem('authToken');
-    if (token) {
-      setIsAuthenticated(true);
-    }
-  }, []);
-
-  const handleLogin = () => {
-    setIsAuthenticated(true);
-  };
-
-  const handleRegister = () => {
-    setIsAuthenticated(true);
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('user_id');
-    setIsAuthenticated(false);
-    
-    navigate('/'); // 🔄 Redirige al login inmediatamente
-  };
 
   return (
     <div>
       <Routes>
         {isAuthenticated ? (
           <>
-            <Route path="/home" element={<Home onLogout={handleLogout} />} />
+            <Route path="/home" element={<Home />} />
             <Route path="*" element={<Navigate to="/home" />} />
           </>
         ) : (
@@ -64,9 +42,9 @@ function App() {
                     </button>
                   </div>
                   {isLogin ? (
-                    <Login onLogin={handleLogin} />
+                    <Login onLogin={login} />  
                   ) : (
-                    <Register onRegister={handleRegister} />
+                    <Register />
                   )}
                 </div>
               </section>

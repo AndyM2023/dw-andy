@@ -17,13 +17,14 @@ export const AuthProvider = ({ children }) => {
     setIsAuthenticated(true);
     navigate("/home");
   };
-
   const logout = () => {
     console.log("🔴 CERRANDO SESIÓN...");
     localStorage.removeItem("authToken");
     localStorage.removeItem("user_id");
-    setIsAuthenticated(false); // ✅ ACTUALIZAR ESTADO GLOBAL
-    navigate("/");
+    setIsAuthenticated(false); // ✅ ACTUALIZA EL ESTADO
+    setTimeout(() => {
+      navigate("/"); // ✅ REDIRECCIÓN AL LOGIN DESPUÉS DE ACTUALIZAR ESTADO
+    }, 100); 
   };
 
   return (

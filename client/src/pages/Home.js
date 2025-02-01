@@ -3,13 +3,23 @@ import { AuthContext } from "../context/AuthContext";
 import { getProjects, createProject, updateProject, deleteProject } from "../api/projectService";
 import ProjectList from "../components/projects/ProjectList";
 import ProjectForm from "../components/projects/ProjectForm";
+import { useNavigate } from "react-router-dom"; 
 
 const Home = () => {
-  const { logout } = useContext(AuthContext);
+  const { isAuthenticated, logout } = useContext(AuthContext);
   const [projects, setProjects] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [editingProject, setEditingProject] = useState(null);
   const userId = localStorage.getItem("user_id");
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate("/"); // ✅ Si el usuario no está autenticado, redirige al login
+    } else {
+      fetchProjects();
+    }
+  }, [isAuthenticated]);
 
   useEffect(() => {
     fetchProjects();

@@ -55,17 +55,17 @@ const Register = ({ onRegister }) => {
     <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-lg">
       <div className="mb-4">
         <label htmlFor="username" className="block text-gray-700">Usuario</label>
-        <input type="text" id="username" value={username} onChange={(e) => setUsername(e.target.value)} className="w-full p-2 border rounded-md" required />
+        <input type="text" id="username" value={username} placeholder="Ingrese su usuario" onChange={(e) => setUsername(e.target.value)} className="w-full p-2 border rounded-md" required />
       </div>
 
       <div className="mb-4">
         <label htmlFor="password" className="block text-gray-700">Contraseña</label>
-        <input type="password" id="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full p-2 border rounded-md" required />
+        <input type="password" id="password" value={password} placeholder="Ingrese su contraseña" onChange={(e) => setPassword(e.target.value)} className="w-full p-2 border rounded-md" required />
       </div>
 
       <div className="mb-4">
         <label htmlFor="confirmPassword" className="block text-gray-700">Confirmar Contraseña</label>
-        <input type="password" id="confirmPassword" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="w-full p-2 border rounded-md" required />
+        <input type="password" id="confirmPassword" value={confirmPassword} placeholder="Ingrese nuevamente su contraseña"onChange={(e) => setConfirmPassword(e.target.value)} className="w-full p-2 border rounded-md" required />
       </div>
 
       {error && <p className="text-red-500">{error}</p>}
