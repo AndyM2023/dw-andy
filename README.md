@@ -25,7 +25,7 @@ Características del Proyecto
 
 Instalacion
 
-git clone https://github.com/tu_usuario/tu_repositorio.git
+git clone https://github.com/AndyM2023/dw-andy.git
 
 cd project
 
