@@ -1,18 +1,41 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 function TaskForm({ projectId, task, onSave, onCancel }) {
-  const [title, setTitle] = useState(task?.title || '');
-  const [description, setDescription] = useState(task?.description || '');
-  const [startDate, setStartDate] = useState(task?.start_date || '');
-  const [dueDate, setDueDate] = useState(task?.due_date || '');
-  const [priority, setPriority] = useState(task?.priority || 'Media');
-  const [status, setStatus] = useState(task?.status || 'Pendiente');
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [dueDate, setDueDate] = useState('');
+  const [priority, setPriority] = useState('');
+  const [status, setStatus] = useState('');
+
+  useEffect(() => {
+    if (task) {
+      setTitle(task.title);
+      setDescription(task.description);
+      setStartDate(task.start_date ? task.start_date.split("T")[0] : "");
+      setDueDate(task.due_date ? task.due_date.split("T")[0] : "");
+      setPriority(task.priority);
+      setStatus(task.status);
+    } else {
+      setTitle('');
+      setDescription('');
+      setStartDate('');
+      setDueDate('');
+      setPriority('Media');
+      setStatus('Pendiente');
+    }
+  }, [task]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!title || !startDate || !dueDate) {
-      alert("⚠️ Todos los campos obligatorios deben ser llenados.");
+    if (!title.trim() || !description.trim() || !startDate || !dueDate) {
+      alert("⚠️ Todos los campos son obligatorios.");
+      return;
+    }
+
+    if (new Date(startDate) >= new Date(dueDate)) {
+      alert("⚠️ La fecha de inicio debe ser menor a la fecha de vencimiento.");
       return;
     }
 
@@ -23,7 +46,7 @@ function TaskForm({ projectId, task, onSave, onCancel }) {
       due_date: dueDate,
       priority,
       status,
-      project_id: projectId
+      project_id: task ? task.project_id : projectId, // ✅ Mantener el project_id correcto
     };
 
     try {
@@ -49,7 +72,6 @@ function TaskForm({ projectId, task, onSave, onCancel }) {
       alert("✅ Tarea guardada correctamente.");
       onSave(data);
       onCancel();
-      window.location.reload(); // ✅ Recargar la página al guardar
     } catch (error) {
       console.error("❌ Error al guardar la tarea:", error);
       alert("❌ Error al guardar la tarea. Revisa la consola.");

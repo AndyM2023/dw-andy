@@ -5,18 +5,38 @@ import React, { useState } from 'react';
 function ProjectForm({ project, onSave, onCancel }) {
   const [name, setName] = useState(project?.name || '');
   const [description, setDescription] = useState(project?.description || '');
-  const [startDate, setStartDate] = useState(project?.start_date || '');
-  const [endDate, setEndDate] = useState(project?.end_date || '');
+  const [startDate, setStartDate] = useState(project?.start_date ? project.start_date.split("T")[0] : "");
+  const [endDate, setEndDate] = useState(project?.end_date ? project.end_date.split("T")[0] : "");
+
 
   const handleSubmit = (e) => {
     e.preventDefault();
   
     const userId = localStorage.getItem('user_id');
   
+
     if (!userId || userId === "undefined" || userId === "null") {
       console.error("❌ user_id no está definido en localStorage");
       return;
     }
+
+    if (new Date(startDate) >= new Date(endDate)) {
+      alert("⚠️ La fecha de inicio debe ser menor a la fecha de finalización.");
+      return;
+    }
+
+    if (!name.trim() || !description.trim() || !startDate || !endDate) {
+      alert("⚠️ Todos los campos son obligatorios.");
+      return;
+    }
+
+    const today = new Date().toISOString().split("T")[0]; // Fecha actual en formato "YYYY-MM-DD"
+
+    if (startDate < today) {
+      alert("⚠️ La fecha de inicio no puede ser en el pasado.");
+      return;
+    }
+
     
     const projectData = {
       name,
@@ -131,4 +151,3 @@ function ProjectForm({ project, onSave, onCancel }) {
 }
 
 export default ProjectForm;
-

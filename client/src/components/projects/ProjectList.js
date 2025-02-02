@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import TaskForm from '../tasks/TaskForm';
 
@@ -16,21 +15,36 @@ function ProjectList({ projects = [], onEdit, onDelete }) {
   const [showTaskForm, setShowTaskForm] = useState(null);
   const [editingTask, setEditingTask] = useState(null);
 
+  // ✅ Función para obtener tareas por proyecto
   const fetchTasks = (projectId) => {
     fetch(`http://localhost:3001/api/tasks/project/${projectId}`)
       .then(response => response.json())
       .then(data => setTasks(prevTasks => ({ ...prevTasks, [projectId]: Array.isArray(data) ? data : [] })))
       .catch(error => {
-        console.error(`Error al obtener tareas para el proyecto ${projectId}:`, error);
+        console.error(`❌ Error al obtener tareas para el proyecto ${projectId}:`, error);
         setTasks(prevTasks => ({ ...prevTasks, [projectId]: [] }));
       });
   };
 
+  // ✅ Obtener tareas al cargar los proyectos
   useEffect(() => {
     projects.forEach(project => {
       fetchTasks(project.id);
     });
   }, [projects]);
+
+  // ✅ Función para eliminar una tarea
+  const handleDeleteTask = (taskId, projectId) => {
+    console.log(`🗑️ Eliminando tarea ID: ${taskId} del Proyecto ID: ${projectId}`);
+    fetch(`http://localhost:3001/api/tasks/${taskId}`, { method: "DELETE" })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error("❌ Error al eliminar la tarea");
+        }
+        fetchTasks(projectId); // ✅ Recargar solo las tareas de este proyecto
+      })
+      .catch(error => console.error("❌ Error al eliminar tarea:", error));
+  };
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -46,6 +60,7 @@ function ProjectList({ projects = [], onEdit, onDelete }) {
           >
             <h3 className="text-2xl font-bold mb-3 text-white">{project.name}</h3>
             <p className="text-gray-400 mb-4 text-sm">{project.description}</p>
+            
             <div className="space-y-2 text-sm text-gray-400">
               <div className="flex justify-between">
                 <span>📅 Inicio:</span>
@@ -56,6 +71,7 @@ function ProjectList({ projects = [], onEdit, onDelete }) {
                 <span>{new Date(project.end_date).toLocaleDateString()}</span>
               </div>
             </div>
+            
             <div className="mt-5 flex space-x-3">
               <button
                 onClick={() => onEdit(project)}
@@ -79,6 +95,7 @@ function ProjectList({ projects = [], onEdit, onDelete }) {
                 ➕ Tarea
               </button>
             </div>
+
             {(showTaskForm === project.id || editingTask) && (
               <TaskForm
                 projectId={project.id}
@@ -94,6 +111,8 @@ function ProjectList({ projects = [], onEdit, onDelete }) {
                 }}
               />
             )}
+
+            {/* ✅ LISTA DE TAREAS DEL PROYECTO */}
             <div className="mt-6">
               <h4 className="text-xl font-bold text-white mb-3">📋 Tareas</h4>
               {Array.isArray(tasks[project.id]) && tasks[project.id].length === 0 ? (
@@ -101,22 +120,33 @@ function ProjectList({ projects = [], onEdit, onDelete }) {
               ) : (
                 <ul className="space-y-3">
                   {Array.isArray(tasks[project.id]) && tasks[project.id].map(task => (
-                    <li key={task.id} className="bg-gray-800 p-4 rounded-lg border border-gray-700 shadow-md flex justify-between items-center">
-                      <div>
+                    <li key={task.id} className="bg-gray-800 p-4 rounded-lg border border-gray-700 shadow-md">
+                      <div className="mb-4">
                         <p className="text-white font-semibold">{task.title}</p>
                         <p className="text-gray-400 text-sm">{task.description}</p>
                         <p className="text-sm text-yellow-400">📌 Prioridad: {task.priority}</p>
                         <p className="text-sm text-green-400">📋 Estado: {task.status}</p>
                       </div>
-                      <button
-                        className="px-3 py-1 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition"
-                        onClick={() => {
-                          setEditingTask(task);
-                          setShowTaskForm(project.id);
-                        }}
-                      >
-                        ✏️ Editar
-                      </button>
+                      <div className="flex justify-center space-x-3 mt-4">
+                        {/* ✅ Botón Editar */}
+                        <button
+                          className="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition"
+                          onClick={() => {
+                            setEditingTask(task);
+                            setShowTaskForm(project.id);
+                          }}
+                        >
+                          ✏️ Editar
+                        </button>
+
+                        {/* ✅ Botón Eliminar */}
+                        <button
+                          className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
+                          onClick={() => handleDeleteTask(task.id, project.id)}
+                        >
+                          🗑️ Eliminar
+                        </button>
+                      </div>
                     </li>
                   ))}
                 </ul>

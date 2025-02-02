@@ -15,7 +15,7 @@ const Home = () => {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      navigate("/"); // ✅ Si el usuario no está autenticado, redirige al login
+      navigate("/"); 
     } else {
       fetchProjects();
     }
