@@ -18,6 +18,10 @@ const validateRegister = (req, res, next) => {
   if (!username || !validateUsername(username)) {
     return res.status(400).json({ error: 'El nombre de usuario debe tener al menos 3 caracteres.' });
   }
+//nuevo
+  if (!username == password) {
+    return res.status(400).json({ error: 'El nombre de usuario no debe ser igual que la contraseña.' });
+  }
 
   if (!password || !validatePassword(password)) {
     return res.status(400).json({ error: 'La contraseña debe tener al menos 8 caracteres.' });

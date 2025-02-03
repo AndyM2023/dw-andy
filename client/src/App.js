@@ -1,20 +1,46 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { Route, Routes, Navigate } from 'react-router-dom';
 import { AuthContext } from './context/AuthContext';
+import { getProjects } from './api/projectService'; // ✅ Importar el servicio de proyectos
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import Home from './pages/Home';
+import Statistics from './pages/Statistics'; 
+import ProjectDetails from './components/projects/ProjectDetails'; 
+import Navbar from "./components/Navbar"; // ✅ Importar Navbar
 
 function App() {
-  const { isAuthenticated, login } = useContext(AuthContext); // ✅ Asegúrate de obtener `login`
+  const { isAuthenticated, login } = useContext(AuthContext);
   const [isLogin, setIsLogin] = useState(true);
+  const [projects, setProjects] = useState([]); // ✅ Estado para almacenar proyectos
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchProjects();
+    }
+  }, [isAuthenticated]);
+
+  const fetchProjects = async () => {
+    try {
+      const userId = localStorage.getItem('user_id');
+      if (!userId) return;
+      const data = await getProjects(userId);
+      setProjects(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("❌ Error al obtener proyectos:", err);
+    }
+  };
 
   return (
     <div>
+      {isAuthenticated && <Navbar />} {/* ✅ Muestra el Navbar solo si el usuario está autenticado */}
+
       <Routes>
         {isAuthenticated ? (
           <>
             <Route path="/home" element={<Home />} />
+            <Route path="/statistics" element={<Statistics projects={projects} />} /> {/* ✅ Pasar proyectos */}
+            <Route path="/project/:id" element={<ProjectDetails projects={projects} />} /> {/* ✅ Pasar proyectos */}
             <Route path="*" element={<Navigate to="/home" />} />
           </>
         ) : (
@@ -41,11 +67,7 @@ function App() {
                       Registrarse
                     </button>
                   </div>
-                  {isLogin ? (
-                    <Login onLogin={login} />  
-                  ) : (
-                    <Register />
-                  )}
+                  {isLogin ? <Login onLogin={login} /> : <Register />}
                 </div>
               </section>
             } />

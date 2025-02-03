@@ -1,9 +1,17 @@
 const API_URL = "http://localhost:3001/api/projects";
 
 export const getProjects = async (userId) => {
-  const response = await fetch(`${API_URL}?user_id=${userId}`);
-  return response.json();
+  try {
+    const response = await fetch(`http://localhost:3001/api/projects?user_id=${userId}`);
+    const data = await response.json();
+    console.log("📊 Proyectos obtenidos desde el backend:", data);
+    return data;
+  } catch (error) {
+    console.error("❌ Error al obtener proyectos:", error);
+    return [];
+  }
 };
+
 
 export const createProject = async (projectData) => {
   const response = await fetch(API_URL, {

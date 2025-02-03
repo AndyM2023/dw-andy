@@ -31,12 +31,12 @@ function ProjectForm({ project, onSave, onCancel }) {
     }
 
     const today = new Date().toISOString().split("T")[0]; // Fecha actual en formato "YYYY-MM-DD"
-
+/*
     if (startDate < today) {
       alert("⚠️ La fecha de inicio no puede ser en el pasado.");
       return;
     }
-
+*/
     
     const projectData = {
       name,

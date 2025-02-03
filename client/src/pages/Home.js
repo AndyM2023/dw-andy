@@ -70,27 +70,17 @@ const Home = () => {
 
   return (
     <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 min-h-screen text-white">
-      <nav className="bg-gray-800 text-white p-4 shadow-lg">
-        <div className="flex justify-between items-center max-w-7xl mx-auto">
-          <div className="text-lg font-semibold">Gestión de Proyectos</div>
-          <button
-            className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition"
-            onClick={logout}
-          >
-            Cerrar Sesión
-          </button>
-        </div>
-      </nav>
-
       <div className="max-w-7xl mx-auto p-4">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Mis Proyectos</h1>
+          
           <button
             className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
             onClick={handleAddProject}
           >
             Nuevo Proyecto
           </button>
+          
         </div>
 
         {showForm && (
