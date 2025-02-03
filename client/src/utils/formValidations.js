@@ -12,6 +12,10 @@ export const validatePassword = (password) => {
   export const validatePasswordMatch = (password, confirmPassword) => {
     return password === confirmPassword;
   };
+
+  export const validateUsernameNotEqualPassword = (username, password) => {
+    return username !== password;
+};
   
   // Validación general para los formularios
   export const validateForm = (data) => {
@@ -28,6 +32,10 @@ export const validatePassword = (password) => {
     if (data.password !== data.confirmPassword) {
       errors.confirmPassword = 'Las contraseñas no coinciden.';
     }
+
+    if (!validateUsernameNotEqualPassword(data.username, data.password)) {
+      errors.usernamePassword = 'El usuario no puede ser igual a la contraseña.';
+  }
   
     return errors;
   };

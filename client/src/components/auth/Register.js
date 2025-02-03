@@ -37,14 +37,25 @@ const Register = ({ onRegister }) => {
       const data = await response.json();
 
       if (response.ok) {
-        setSuccessMessage('Registro exitoso, ya puedes iniciar sesión');
+        setSuccessMessage('✅ Registro exitoso, ya puedes iniciar sesión');
         setUsername('');
         setPassword('');
         setConfirmPassword('');
-        onRegister();
+      
+        // ✅ GUARDAR EL TOKEN Y EL USER ID
+        localStorage.setItem("authToken", data.token);
+        localStorage.setItem("user_id", data.userId);
+      
+        // ✅ Verifica si onRegister está definido antes de llamarlo
+        if (onRegister) {
+          onRegister();
+        } else {
+          console.warn("⚠️ onRegister no está definido");
+        }
       } else {
-        setError(data.error || 'Error al registrarse');
+        setError(data.message || '❌ Error al registrarse');
       }
+      
     } catch (err) {
       console.error('Error en la conexión:', err);
       setError('Error en la conexión al servidor');

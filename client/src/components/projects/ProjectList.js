@@ -72,7 +72,7 @@ function ProjectList({ projects = [], onEdit, onDelete }) {
               </div>
             </div>
 
-            {/* 📌 BOTONES - AHORA OCUPAN MÁS ESPACIO */}
+
             <div className="mt-5 flex flex-col gap-3">
               <button
                 onClick={() => onEdit(project)}
@@ -97,7 +97,6 @@ function ProjectList({ projects = [], onEdit, onDelete }) {
               </button>
             </div>
 
-            {/* ✅ FORMULARIO DE TAREAS */}
             {(showTaskForm === project.id || editingTask) && (
               <TaskForm
                 projectId={project.id}
@@ -114,7 +113,7 @@ function ProjectList({ projects = [], onEdit, onDelete }) {
               />
             )}
 
-            {/* ✅ LISTA DE TAREAS DEL PROYECTO */}
+
             <div className="mt-6">
               <h4 className="text-xl font-bold text-white mb-3">📋 Tareas</h4>
               {Array.isArray(tasks[project.id]) && tasks[project.id].length === 0 ? (

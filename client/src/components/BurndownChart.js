@@ -166,7 +166,7 @@ function BurndownChart({ tasks, startDate, endDate }) {
   return (
     <div className="flex justify-center">
       <div className="bg-gray-900 p-6 rounded-lg shadow-md text-center">
-        <h2 className="text-white text-xl font-bold mb-3">📉 Burndown Chart</h2>
+        <h2 className="text-white text-xl font-bold mb-3">📉 Diagrama de Burndown</h2>
         <svg ref={svgRef}></svg>
       </div>
     </div>

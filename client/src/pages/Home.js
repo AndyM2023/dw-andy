@@ -15,12 +15,12 @@ const Home = () => {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      navigate("/"); 
+      navigate("/");
     } else {
       fetchProjects();
     }
-  }, [isAuthenticated]);
-
+    window.scrollTo(0, 0); 
+  }, [isAuthenticated])
   useEffect(() => {
     fetchProjects();
   }, []);

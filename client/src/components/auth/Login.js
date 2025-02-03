@@ -1,7 +1,7 @@
 
 
 import React, { useState } from 'react';
-
+import Swal from 'sweetalert2';
 const Login = ({ onLogin }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -12,7 +12,11 @@ const Login = ({ onLogin }) => {
     setError('');
 
     if (!username || !password) {
-      setError('Por favor, ingresa tu usuario y contraseña');
+      Swal.fire({
+        icon: 'warning',
+        title: 'Campos vacíos',
+        text: 'Por favor, ingresa tu usuario y contraseña',
+      });
       return;
     }
 
@@ -31,32 +35,35 @@ const Login = ({ onLogin }) => {
 //LINEA DE CAMBIO
 
 
-      if (response.ok && data.userId) {
-        // Asegurarse de que el userId existe y convertirlo a string
-        const userIdString = data.userId.toString();
-        localStorage.setItem('authToken', data.token);
-        localStorage.setItem('user_id', userIdString);
-        
-        console.log('Token guardado:', data.token);
-        console.log('User ID guardado:', userIdString);
-        
-        // Verificar que se guardó correctamente
-        const savedUserId = localStorage.getItem('user_id');
-        console.log('User ID verificación:', savedUserId);
-        
-        if (savedUserId && savedUserId !== 'undefined' && savedUserId !== 'null') {
-          onLogin();
-        } else {
-          setError('Error al guardar la sesión. Por favor, intente nuevamente.');
-        }
-      } else {
-        setError(data.error || 'Error al iniciar sesión');
-      }
-    } catch (err) {
-      console.error('Error en la conexión:', err);
-      setError('Error en la conexión al servidor');
-    }
-  };
+    
+if (response.ok && data.userId) {
+  localStorage.setItem('authToken', data.token);
+  localStorage.setItem('user_id', data.userId.toString());
+
+  Swal.fire({
+    icon: 'success',
+    title: '¡Bienvenido!',
+    text: 'Has iniciado sesión correctamente',
+    timer: 2000,
+    showConfirmButton: false,
+  });
+
+  setTimeout(() => onLogin(), 2000);
+} else {
+  Swal.fire({
+    icon: 'error',
+    title: 'Error al iniciar sesión',
+    text: data.error || 'Usuario o contraseña incorrectos',
+  });
+}
+} catch (err) {
+Swal.fire({
+  icon: 'error',
+  title: 'Error de conexión',
+  text: 'No se pudo conectar con el servidor',
+});
+}
+};
 
   return (
     <form onSubmit={handleSubmit}>

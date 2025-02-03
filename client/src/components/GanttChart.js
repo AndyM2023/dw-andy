@@ -1,91 +1,124 @@
-import React, { useEffect, useRef } from 'react';
-import * as d3 from 'd3';
+import React, { useEffect, useRef } from "react";
+import * as d3 from "d3";
 
-function GanttChart({ tasks, milestones }) {
+const GanttChart = ({ tasks }) => {
   const svgRef = useRef();
 
   useEffect(() => {
-    if (!tasks.length) return;
+    if (!tasks || tasks.length === 0) return;
 
-    const margin = { top: 20, right: 30, bottom: 30, left: 100 };
+    const margin = { top: 50, right: 30, bottom: 50, left: 120 };
     const width = 800 - margin.left - margin.right;
     const height = tasks.length * 40;
 
-    // Limpiar SVG existente
+    // Limpiar SVG antes de renderizar
     d3.select(svgRef.current).selectAll("*").remove();
 
-    const svg = d3.select(svgRef.current)
+    const svg = d3
+      .select(svgRef.current)
       .attr("width", width + margin.left + margin.right)
       .attr("height", height + margin.top + margin.bottom)
       .append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    // Escala temporal
-    const timeScale = d3.scaleTime()
-      .domain([
-        d3.min(tasks, d => new Date(d.start_date)),
-        d3.max(tasks, d => new Date(d.due_date))
-      ])
-      .range([0, width]);
+    // Convertir fechas
+    const parseDate = d3.timeParse("%Y-%m-%dT%H:%M:%S.%LZ");
 
-    // Escala vertical para tareas
-    const taskScale = d3.scaleBand()
-      .domain(tasks.map(d => d.title))
+    const today = new Date(); // 📅 Obtener la fecha actual
+
+    // Modificar estados para marcar tareas atrasadas
+    const updatedTasks = tasks.map((task) => {
+      const dueDate = new Date(task.due_date);
+      if (task.status !== "Completada" && dueDate < today) {
+        return { ...task, status: "Atrasada" };
+      }
+      return task;
+    });
+
+    // Escala de tiempo
+    const minDate = d3.min(updatedTasks, (d) => parseDate(d.start_date));
+    const maxDate = d3.max(updatedTasks, (d) => parseDate(d.due_date));
+    const xScale = d3.scaleTime().domain([minDate, maxDate]).range([0, width]);
+
+    // Escala de posición vertical (tareas)
+    const yScale = d3
+      .scaleBand()
+      .domain(updatedTasks.map((d) => d.title))
       .range([0, height])
-      .padding(0.1);
+      .padding(0.3);
 
-    // Ejes
-    const xAxis = d3.axisBottom(timeScale);
-    const yAxis = d3.axisLeft(taskScale);
+    // Eje X (fechas)
+    svg
+      .append("g")
+      .attr("transform", `translate(0, ${height})`)
+      .call(d3.axisBottom(xScale).ticks(6).tickFormat(d3.timeFormat("%b %d")))
+      .selectAll("text")
+      .style("fill", "#ccc");
 
-    svg.append("g")
-      .attr("transform", `translate(0,${height})`)
-      .call(xAxis);
+    // Eje Y (nombres de tareas)
+    svg
+      .append("g")
+      .call(d3.axisLeft(yScale))
+      .selectAll("text")
+      .style("fill", "#ccc");
 
-    svg.append("g")
-      .call(yAxis);
+    // Colores según estado (Incluye "Atrasada")
+    const colorMap = {
+      "Completada": "#4CAF50",
+      "Pendiente": "#FFC107",
+      "En Progreso": "#2196F3",
+      "Atrasada": "#F44336",
+    };
 
-    // Barras de tareas
-    svg.selectAll("rect")
-      .data(tasks)
+    // Agregar barras de tareas
+    svg
+      .selectAll(".bar")
+      .data(updatedTasks)
       .enter()
       .append("rect")
-      .attr("y", d => taskScale(d.title))
-      .attr("x", d => timeScale(new Date(d.start_date)))
-      .attr("width", d => {
-        const start = timeScale(new Date(d.start_date));
-        const end = timeScale(new Date(d.due_date));
-        return end - start;
+      .attr("x", (d) => xScale(parseDate(d.start_date)))
+      .attr("y", (d) => yScale(d.title))
+      .attr("width", (d) => xScale(parseDate(d.due_date)) - xScale(parseDate(d.start_date)))
+      .attr("height", yScale.bandwidth())
+      .attr("fill", (d) => colorMap[d.status] || "#ccc")
+      .attr("rx", 5)
+      .attr("ry", 5)
+      .on("mouseover", (event, d) => {
+        tooltip
+          .style("visibility", "visible")
+          .html(
+            `<strong>${d.title}</strong><br>
+            📅 Inicio: ${new Date(d.start_date).toLocaleDateString()}<br>
+            🏁 Fin: ${new Date(d.due_date).toLocaleDateString()}<br>
+            🔹 Estado: ${d.status === "Atrasada" ? "❌ Atrasada" : d.status}`
+          );
       })
-      .attr("height", taskScale.bandwidth())
-      .attr("fill", d => {
-        switch(d.status) {
-          case 'completed': return '#10B981';
-          case 'in-progress': return '#3B82F6';
-          default: return '#F59E0B';
-        }
+      .on("mousemove", (event) => {
+        tooltip
+          .style("top", `${event.pageY - 20}px`)
+          .style("left", `${event.pageX + 10}px`);
       })
-      .attr("rx", 6)
-      .attr("ry", 6);
+      .on("mouseout", () => tooltip.style("visibility", "hidden"));
 
-    // Hitos
-    if (milestones && milestones.length > 0) {
-      svg.selectAll(".milestone")
-        .data(milestones)
-        .enter()
-        .append("path")
-        .attr("class", "milestone")
-        .attr("d", d3.symbol().type(d3.symbolDiamond).size(100))
-        .attr("transform", d => `translate(${timeScale(new Date(d.due_date))},${height + 10})`)
-        .attr("fill", d => d.status === 'completed' ? '#10B981' : '#F59E0B');
-    }
-  }, [tasks, milestones]);
+    // Tooltip
+    const tooltip = d3
+      .select("body")
+      .append("div")
+      .style("position", "absolute")
+      .style("background", "rgba(0,0,0,0.8)")
+      .style("color", "white")
+      .style("padding", "8px")
+      .style("border-radius", "5px")
+      .style("visibility", "hidden");
+
+  }, [tasks]);
 
   return (
-    <div className="overflow-x-auto">
+    <div className="bg-gray-900 p-6 rounded-lg shadow-md text-center">
+      <h2 className="text-white text-xl font-bold mb-3">📊 Diagrama de Gantt</h2>
       <svg ref={svgRef}></svg>
     </div>
   );
-}
+};
 
 export default GanttChart;
