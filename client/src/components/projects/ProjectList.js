@@ -47,7 +47,7 @@ function ProjectList({ projects = [], onEdit, onDelete }) {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {projects.length === 0 ? (
         <div className="col-span-full text-center p-4">
           <p className="text-gray-500">No hay proyectos disponibles.</p>
@@ -56,12 +56,12 @@ function ProjectList({ projects = [], onEdit, onDelete }) {
         projects.map(project => (
           <div
             key={project.id}
-            className="bg-gray-900 rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-shadow p-6 border border-gray-700"
+            className="bg-gray-650 rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-shadow p-6 border border-blue-50"
           >
-            <h3 className="text-2xl font-bold mb-3 text-white">{project.name}</h3>
-            <p className="text-gray-400 mb-4 text-sm">{project.description}</p>
+            <h3 className="text-2xl font-bold mb-2 text-white">{project.name}</h3>
+            <p className="text-gray-400 text-sm">{project.description}</p>
             
-            <div className="space-y-2 text-sm text-gray-400">
+            <div className="space-y-2 text-sm text-gray-400 mt-4">
               <div className="flex justify-between">
                 <span>📅 Inicio:</span>
                 <span>{new Date(project.start_date).toLocaleDateString()}</span>
@@ -71,31 +71,33 @@ function ProjectList({ projects = [], onEdit, onDelete }) {
                 <span>{new Date(project.end_date).toLocaleDateString()}</span>
               </div>
             </div>
-            
-            <div className="mt-5 flex space-x-3">
+
+            {/* 📌 BOTONES - AHORA OCUPAN MÁS ESPACIO */}
+            <div className="mt-5 flex flex-col gap-3">
               <button
                 onClick={() => onEdit(project)}
-                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                className="px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition w-full"
               >
-                ✏️ Editar
+                ✏️ Editar Proyecto
               </button>
               <button
                 onClick={() => onDelete(project.id)}
-                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+                className="px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition w-full"
               >
-                🗑️ Eliminar
+                🗑️ Eliminar Proyecto
               </button>
               <button
                 onClick={() => {
                   setEditingTask(null);
                   setShowTaskForm(project.id);
                 }}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+                className="px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition w-full"
               >
-                ➕ Tarea
+                ➕ Añadir Tarea
               </button>
             </div>
 
+            {/* ✅ FORMULARIO DE TAREAS */}
             {(showTaskForm === project.id || editingTask) && (
               <TaskForm
                 projectId={project.id}
@@ -127,24 +129,22 @@ function ProjectList({ projects = [], onEdit, onDelete }) {
                         <p className="text-sm text-yellow-400">📌 Prioridad: {task.priority}</p>
                         <p className="text-sm text-green-400">📋 Estado: {task.status}</p>
                       </div>
-                      <div className="flex justify-center space-x-3 mt-4">
-                        {/* ✅ Botón Editar */}
+                      <div className="flex gap-3 mt-4">
                         <button
-                          className="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition"
+                          className="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition w-full"
                           onClick={() => {
                             setEditingTask(task);
                             setShowTaskForm(project.id);
                           }}
                         >
-                          ✏️ Editar
+                          ✏️ Editar Tarea
                         </button>
 
-                        {/* ✅ Botón Eliminar */}
                         <button
-                          className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
+                          className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition w-full"
                           onClick={() => handleDeleteTask(task.id, project.id)}
                         >
-                          🗑️ Eliminar
+                          🗑️ Eliminar Tarea
                         </button>
                       </div>
                     </li>

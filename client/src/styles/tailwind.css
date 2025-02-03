@@ -1,9 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
 @layer components {
-  /* Botones */
   .btn {
     @apply px-4 py-2 rounded-md text-white transition font-semibold;
   }
@@ -16,25 +14,7 @@
   .btn-success {
     @apply bg-green-500 hover:bg-green-600;
   }
-  .btn-outline {
-    @apply border border-gray-400 text-gray-700 hover:bg-gray-300;
-  }
-
-  /* Formularios */
-  .input {
-    @apply w-full p-2 border rounded-md bg-gray-700 border-gray-600 text-white;
-  }
-  
-  .label {
-    @apply block text-sm font-medium text-gray-300;
-  }
-
-  /* Contenedores */
-  .card {
-    @apply bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-md;
-  }
-
   .container {
-    @apply max-w-7xl mx-auto p-4;
+    @apply max-w-6xl mx-auto p-6;
   }
 }
