@@ -1,34 +1,54 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import BurndownChart from "../components/BurndownChart";
 import GanttChart from "../components/GanttChart";
-import { getTasksByProject } from "../api/taskService";
+import { AuthContext } from "../context/AuthContext";
 
-function Statistics({ projects }) {
+function Statistics() {
+  const [projects, setProjects] = useState([]);
   const [tasksByProject, setTasksByProject] = useState({});
+  const { userRole } = useContext(AuthContext);
 
   useEffect(() => {
-    console.log("📊 Datos de proyectos en estadísticas:", projects);
-    window.scrollTo(0, 0);
-    
-    if (!projects || projects.length === 0) {
-      console.warn("⚠️ No hay proyectos disponibles en estadísticas.");
-      return;
+    fetchProjects();
+  }, []);
+
+  const fetchProjects = async () => {
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch('http://localhost:3001/api/projects', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      const data = await response.json();
+      setProjects(Array.isArray(data) ? data : []);
+
+      // Fetch tasks for each project
+      data.forEach(project => {
+        fetchTasksForProject(project.id);
+      });
+    } catch (error) {
+      console.error('Error al obtener proyectos:', error);
     }
+  };
 
-    projects.forEach(async (project) => {
-      console.log(`🔎 Obteniendo tareas del proyecto: ${project.name} (ID: ${project.id})`);
-
-      try {
-        const tasks = await getTasksByProject(project.id);
-        setTasksByProject((prev) => ({
-          ...prev,
-          [project.id]: tasks,
-        }));
-      } catch (error) {
-        console.error(`❌ Error al obtener tareas para el proyecto ${project.name}:`, error);
-      }
-    });
-  }, [projects]);
+  const fetchTasksForProject = async (projectId) => {
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch(`http://localhost:3001/api/tasks/project/${projectId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      const tasks = await response.json();
+      setTasksByProject(prev => ({
+        ...prev,
+        [projectId]: tasks
+      }));
+    } catch (error) {
+      console.error(`Error al obtener tareas para el proyecto ${projectId}:`, error);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-950 p-8"> 
@@ -49,8 +69,6 @@ function Statistics({ projects }) {
 
             {tasksByProject[project.id] && tasksByProject[project.id].length > 0 ? (
               <div className="flex flex-col space-y-6 mt-4 p-6 bg-gray-800 rounded-lg shadow-md">
-                
-                {/* Burndown Chart */}
                 <div className="p-6 bg-gray-900 rounded-lg shadow-lg">
                   <h4 className="text-xl font-bold text-white mb-3">📉 Burndown Chart</h4>
                   <BurndownChart 
@@ -60,14 +78,12 @@ function Statistics({ projects }) {
                   />
                 </div>
 
-                {/* Gantt Chart ocupa TODO el ancho */}
                 <div className="p-6 bg-gray-900 rounded-lg shadow-lg w-full">
                   <h4 className="text-xl font-bold text-white mb-3">📅 Diagrama de Gantt</h4>
                   <div className="w-full max-w-none">
                     <GanttChart tasks={tasksByProject[project.id] || []} />
                   </div>
                 </div>
-
               </div>
             ) : (
               <p className="text-gray-400 mt-3">No hay tareas en este proyecto.</p>

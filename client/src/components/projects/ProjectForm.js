@@ -1,6 +1,5 @@
-
-
 import React, { useState } from 'react';
+import Swal from 'sweetalert2';
 
 function ProjectForm({ project, onSave, onCancel }) {
   const [name, setName] = useState(project?.name || '');
@@ -8,73 +7,54 @@ function ProjectForm({ project, onSave, onCancel }) {
   const [startDate, setStartDate] = useState(project?.start_date ? project.start_date.split("T")[0] : "");
   const [endDate, setEndDate] = useState(project?.end_date ? project.end_date.split("T")[0] : "");
 
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-  
-    const userId = localStorage.getItem('user_id');
-  
 
-    if (!userId || userId === "undefined" || userId === "null") {
-      console.error("❌ user_id no está definido en localStorage");
+    if (!name.trim() || !description.trim() || !startDate || !endDate) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Campos incompletos',
+        text: 'Todos los campos son obligatorios'
+      });
       return;
     }
 
     if (new Date(startDate) >= new Date(endDate)) {
-      alert("⚠️ La fecha de inicio debe ser menor a la fecha de finalización.");
+      Swal.fire({
+        icon: 'warning',
+        title: 'Fechas inválidas',
+        text: 'La fecha de inicio debe ser anterior a la fecha de finalización'
+      });
       return;
     }
 
-    if (!name.trim() || !description.trim() || !startDate || !endDate) {
-      alert("⚠️ Todos los campos son obligatorios.");
-      return;
-    }
-
-    const today = new Date().toISOString().split("T")[0]; // Fecha actual en formato "YYYY-MM-DD"
-/*
-    if (startDate < today) {
-      alert("⚠️ La fecha de inicio no puede ser en el pasado.");
-      return;
-    }
-*/
-    
     const projectData = {
       name,
       description,
       start_date: startDate,
-      end_date: endDate,
-      user_id: Number(userId)
+      end_date: endDate
     };
-  
-    const API_BASE_URL = "http://localhost:3001/api/projects";
-    const url = project ? `${API_BASE_URL}/${project.id}` : API_BASE_URL;
-    const method = project ? 'PUT' : 'POST';
-  
-    fetch(url, {
-      method: method,
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(projectData)
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(`❌ Error en el servidor: ${response.status} ${response.statusText}`);
-      }
-      return response.json().catch(() => {
-        throw new Error("❌ La respuesta del servidor no es JSON válido");
+
+    try {
+      await onSave(projectData);
+      Swal.fire({
+        icon: 'success',
+        title: 'Éxito',
+        text: `Proyecto ${project ? 'actualizado' : 'creado'} correctamente`
       });
-    })
-    .then(data => {
-      console.log("✅ Proyecto guardado:", data);
-      alert(project ? "✅ Proyecto actualizado correctamente!" : "✅ Proyecto creado correctamente!");
-      window.location.reload(); // ✅ Recargar la página
-    })
-    .catch(error => console.error("❌ Error al guardar el proyecto:", error.message));
+    } catch (error) {
+      console.error('Error al guardar el proyecto:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'No se pudo guardar el proyecto'
+      });
+    }
   };
+
   return (
     <div className="bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-md">
-      <h2 className="text-xl font-bold mb-4">
+      <h2 className="text-xl font-bold mb-4 text-white">
         {project ? 'Editar Proyecto' : 'Nuevo Proyecto'}
       </h2>
       <form onSubmit={handleSubmit} className="space-y-4">
