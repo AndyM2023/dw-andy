@@ -2,18 +2,32 @@ const express = require('express');
 const {
   createProject,
   getProjects,
-  getProjectById,
+  assignUserToProject,
+  removeUserFromProject,
+  getProjectUsers,
   updateProject,
+  getProjectById,
   deleteProject,
-} = require('../controllers/projectController'); // Todas las funciones deben estar aquí
+
+
+} = require('../controllers/projectController');
+const { authMiddleware, isAdmin } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
-// Definir las rutas de proyectos
-router.post('/', createProject); // Crear un proyecto
-router.get('/', getProjects); // Obtener todos los proyectos
-router.get('/:id', getProjectById); // Obtener un proyecto específico
-router.put('/:id', updateProject); // Actualizar un proyecto
-router.delete('/:id', deleteProject); // Eliminar un proyecto
+// Aplicar middleware de autenticación a todas las rutas
+router.use(authMiddleware);
+
+// Rutas básicas de proyectos
+router.post('/', isAdmin, createProject); // Solo admin puede crear proyectos
+router.get('/', getProjects); // Filtrado por rol en el controlador
+router.get("/:id", authMiddleware, getProjectById);
+router.put('/:id', updateProject); 
+// Rutas de gestión de usuarios en proyectos
+router.post('/:projectId/users', isAdmin, assignUserToProject); // Solo admin puede asignar usuarios
+router.delete('/:projectId/users/:userId', isAdmin, removeUserFromProject); // Solo admin puede remover usuarios
+router.get('/:projectId/users', getProjectUsers); // Todos pueden ver los usuarios de un proyecto
+router.delete('/:id', authMiddleware, deleteProject);
+
 
 module.exports = router;

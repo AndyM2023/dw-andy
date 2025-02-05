@@ -1,5 +1,7 @@
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/database');
+const Project = require('./Project');
+
 
 const User = sequelize.define('User', {
   id: { 
@@ -15,9 +17,16 @@ const User = sequelize.define('User', {
   password: { 
     type: DataTypes.STRING, 
     allowNull: false 
+  },
+  role: {
+    type: DataTypes.ENUM('admin', 'user'),
+    defaultValue: 'user',
+    allowNull: false
   }
 }, {
-  timestamps: false // ✅ Esto evitará que Sequelize intente usar createdAt y updatedAt
+  timestamps: false
 });
+
+
 
 module.exports = User;
