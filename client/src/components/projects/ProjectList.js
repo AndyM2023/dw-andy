@@ -171,6 +171,7 @@ function ProjectList({ projects = [], onEdit, onDelete }) {
   const [showTaskForm, setShowTaskForm] = useState(null);
   const [editingTask, setEditingTask] = useState(null);
   const [showAssignForm, setShowAssignForm] = useState(null);
+  const [projectUsers, setProjectUsers] = useState({});
 
   useEffect(() => {
     if (projects.length > 0) {
@@ -270,6 +271,19 @@ function ProjectList({ projects = [], onEdit, onDelete }) {
                 <span>{new Date(project.end_date).toLocaleDateString()}</span>
               </div>
             </div>
+
+            {/* Mostrar usuarios asignados al proyecto */}
+            <div className="mt-4">
+              <h4 className="text-white font-semibold mb-2">👥 Usuarios Asignados:</h4>
+              <div className="flex flex-wrap gap-2">
+                {projectUsers[project.id]?.map(user => (
+                  <span key={user.id} className="bg-blue-500 text-white px-2 py-1 rounded-full text-sm">
+                    {user.username}
+                  </span>
+                ))}
+              </div>
+            </div>
+
 
             <div className="mt-5 flex flex-col gap-3">
               {userRole === 'admin' && (

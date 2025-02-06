@@ -2,6 +2,42 @@ const Project = require('../models/Project');
 const ProjectUser = require('../models/ProjectUser');
 const User = require('../models/User');
 
+//nuevo
+const { Op } = require('sequelize');
+
+
+// Nueva función para obtener usuarios no asignados
+const getUnassignedUsers = async (req, res) => {
+  try {
+    const { projectId } = req.params;
+    
+    // Obtener IDs de usuarios ya asignados al proyecto
+    const assignedUsers = await ProjectUser.findAll({
+      where: { project_id: projectId },
+      attributes: ['user_id']
+    });
+    
+    const assignedUserIds = assignedUsers.map(u => u.user_id);
+
+    // Obtener usuarios no asignados
+    const unassignedUsers = await User.findAll({
+      where: {
+        id: {
+          [Op.notIn]: assignedUserIds
+        }
+      },
+      attributes: ['id', 'username']
+    });
+
+    res.status(200).json(unassignedUsers);
+  } catch (error) {
+    console.error('Error al obtener usuarios no asignados:', error);
+    res.status(500).json({ error: 'Error al obtener usuarios no asignados' });
+  }
+};
+
+//----------------------------------------------------------------
+
 const createProject = async (req, res) => {
   try {
     const project = await Project.create(req.body);
@@ -135,20 +171,21 @@ const updateProject = async (req, res) => {
 const getProjectUsers = async (req, res) => {
   try {
     const { projectId } = req.params;
-
     const users = await User.findAll({
       include: [{
         model: Project,
         where: { id: projectId },
-        through: { attributes: ['assigned_at', 'assigned_by'] }
+        through: { attributes: [] }
       }]
     });
 
     res.status(200).json(users);
   } catch (error) {
+    console.error('Error al obtener usuarios del proyecto:', error);
     res.status(500).json({ error: 'Error al obtener usuarios del proyecto' });
   }
 };
+
 
 const getProjectById = async (req, res) => {
   try {
@@ -197,5 +234,7 @@ module.exports = {
   getProjectUsers ,
   getProjectById ,
   updateProject ,
-  deleteProject  
+  deleteProject  ,
+  getProjectUsers,
+  getUnassignedUsers
 };

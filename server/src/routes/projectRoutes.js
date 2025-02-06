@@ -8,6 +8,7 @@ const {
   updateProject,
   getProjectById,
   deleteProject,
+  getUnassignedUsers,
 
 
 } = require('../controllers/projectController');
@@ -15,7 +16,7 @@ const { authMiddleware, isAdmin } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
-// Aplicar middleware de autenticación a todas las rutas
+
 router.use(authMiddleware);
 
 // Rutas básicas de proyectos
@@ -28,6 +29,6 @@ router.post('/:projectId/users', isAdmin, assignUserToProject); // Solo admin pu
 router.delete('/:projectId/users/:userId', isAdmin, removeUserFromProject); // Solo admin puede remover usuarios
 router.get('/:projectId/users', getProjectUsers); // Todos pueden ver los usuarios de un proyecto
 router.delete('/:id', authMiddleware, deleteProject);
-
+router.get('/:projectId/unassigned-users', getUnassignedUsers);
 
 module.exports = router;

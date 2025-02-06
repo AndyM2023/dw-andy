@@ -7,17 +7,18 @@ const {
   deleteTask,
   assignUserToTask,
   removeUserFromTask,
-} = require('../controllers/taskController');// Asegúrate de que están bien importadas
+} = require('../controllers/taskController');
 
 const { authMiddleware } = require('../middleware/authMiddleware');
 const router = express.Router();
+router.use(authMiddleware);
 
-// Definir las rutas de tareas
-router.post('/', createTask); // Crear una nueva tarea
-router.get('/project/:projectId', getProjectTasks); // Obtener todas las tareas de un proyecto
-router.get('/:id', getTaskById); // Obtener una tarea específica
-router.put('/:id', updateTask); // Actualizar una tarea
-router.delete('/:id', deleteTask); // Eliminar una tarea
+
+router.post('/', createTask); // 
+router.get('/project/:projectId', getProjectTasks); 
+router.get('/:id', getTaskById); 
+router.put('/:id', updateTask); 
+router.delete('/:id', deleteTask);
 router.post('/:taskId/assign', authMiddleware, assignUserToTask);
 router.delete('/:taskId/users/:userId', authMiddleware, removeUserFromTask);
 

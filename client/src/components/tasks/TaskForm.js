@@ -34,7 +34,11 @@ function TaskForm({ projectId, task, onSave, onCancel }) {
       });
       if (response.ok) {
         const data = await response.json();
-        setUsers(data);
+        // Filtrar el usuario ya asignado si estamos editando
+        const filteredUsers = task ? 
+          data.filter(user => !task.assigned_to || user.id === task.assigned_to) : 
+          data;
+        setUsers(filteredUsers);
       }
     } catch (error) {
       console.error('Error al obtener usuarios del proyecto:', error);

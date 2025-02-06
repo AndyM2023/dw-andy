@@ -7,13 +7,13 @@ function UserAssignmentForm({ projectId, onClose, onAssign }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchUsers();
+    fetchUnassignedUsers();
   }, []);
 
-  const fetchUsers = async () => {
+  const fetchUnassignedUsers = async () => {
     try {
       const token = localStorage.getItem('authToken');
-      const response = await fetch('http://localhost:3001/api/auth/users', {
+      const response = await fetch(`http://localhost:3001/api/projects/${projectId}/unassigned-users`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -71,7 +71,7 @@ function UserAssignmentForm({ projectId, onClose, onAssign }) {
       Swal.fire({
         icon: 'error',
         title: 'Error',
-        text: 'No se pudo asignar el usuario al proyecto'
+        text: 'Error al asignar el usuario al proyecto'
       });
     }
   };
@@ -84,42 +84,46 @@ function UserAssignmentForm({ projectId, onClose, onAssign }) {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-md">
         <h2 className="text-xl font-bold mb-4 text-white">Asignar Usuario al Proyecto</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-300">
-              Seleccionar Usuario
-            </label>
-            <select
-              value={selectedUser}
-              onChange={(e) => setSelectedUser(e.target.value)}
-              className="mt-1 block w-full rounded-md bg-gray-700 border-gray-600 text-white"
-              required
-            >
-              <option value="">Seleccione un usuario</option>
-              {users.map(user => (
-                <option key={user.id} value={user.id}>
-                  {user.username}
-                </option>
-              ))}
-            </select>
-          </div>
+        {users.length === 0 ? (
+          <p className="text-white">No hay usuarios disponibles para asignar</p>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-300">
+                Seleccionar Usuario
+              </label>
+              <select
+                value={selectedUser}
+                onChange={(e) => setSelectedUser(e.target.value)}
+                className="mt-1 block w-full rounded-md bg-gray-700 border-gray-600 text-white"
+                required
+              >
+                <option value="">Seleccione un usuario</option>
+                {users.map(user => (
+                  <option key={user.id} value={user.id}>
+                    {user.username}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-          <div className="flex space-x-3">
-            <button
-              type="submit"
-              className="flex-1 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
-            >
-              Asignar
-            </button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition"
-            >
-              Cancelar
-            </button>
-          </div>
-        </form>
+            <div className="flex space-x-3">
+              <button
+                type="submit"
+                className="flex-1 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+              >
+                Asignar
+              </button>
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition"
+              >
+                Cancelar
+              </button>
+            </div>
+          </form>
+        )}
       </div>
     </div>
   );
