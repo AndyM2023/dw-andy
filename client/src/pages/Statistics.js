@@ -51,7 +51,8 @@ function Statistics() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 p-8"> 
+    <div className="min-h-screen bg-gray-950 p-8 pb-16"> 
+      <div className="max-w-7xl mx-auto">
       <h2 className="text-3xl font-bold text-white mb-6 flex items-center">
         📊 Panel de Estadísticas
       </h2>
@@ -91,6 +92,7 @@ function Statistics() {
           </div>
         ))
       )}
+    </div>
     </div>
   );
 }

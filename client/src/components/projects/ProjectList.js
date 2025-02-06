@@ -10,14 +10,14 @@ function ProjectList({ projects = [], onEdit, onDelete }) {
   const [showTaskForm, setShowTaskForm] = useState(null);
   const [editingTask, setEditingTask] = useState(null);
   const [showAssignForm, setShowAssignForm] = useState(null);
-
+  const isAdmin = userRole === 'admin';
+  
   useEffect(() => {
     if (projects.length > 0) {
-      projects.forEach(project => {
-        fetchTasks(project.id);
-      });
+      Promise.all(projects.map(project => fetchTasks(project.id)));
     }
   }, [projects]);
+  
 
   const fetchTasks = async (projectId) => {
     try {
@@ -95,7 +95,7 @@ function ProjectList({ projects = [], onEdit, onDelete }) {
         </div>
       ) : (
         projects.map(project => (
-          <div key={project.id} className="bg-gray-650 rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-shadow p-6 border border-blue-50">
+          <div key={project.id} className=" rounded-xl shadow-lg overflow-hidden hover:shadow-3xl transition-shadow p-2 border-4 border-gray-700 ">
             <h3 className="text-2xl font-bold mb-2 text-white">{project.name}</h3>
             <p className="text-gray-400 text-sm">{project.description}</p>
             
@@ -122,7 +122,7 @@ function ProjectList({ projects = [], onEdit, onDelete }) {
             </div>
 
             <div className="mt-5 flex flex-col gap-3">
-              {userRole === 'admin' && (
+              {isAdmin && (
                 <>
                   <button
                     onClick={() => onEdit(project)}
@@ -204,7 +204,7 @@ function ProjectList({ projects = [], onEdit, onDelete }) {
                       </div>
                       <div className="flex gap-3 mt-4">
                         
-                      {(userRole === 'admin' || Number(userId) === Number(task.assigned_to)) && ( 
+                      {(isAdmin || Number(userId) === Number(task.assigned_to)) && ( 
                           <select
                           
                             value={task.status}
@@ -218,7 +218,7 @@ function ProjectList({ projects = [], onEdit, onDelete }) {
                           </select>
                           
                         )}
-                        {userRole === 'admin' && (
+                        {isAdmin && (
                           <>
                             <button
                               className="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition flex-1"

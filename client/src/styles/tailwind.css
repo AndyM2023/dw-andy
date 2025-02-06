@@ -40,3 +40,13 @@
 .btn-delete {
   @apply bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg text-white font-semibold transition;
 }
+@keyframes gradient-animation {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient-animation 1s infinite alternate;
+}

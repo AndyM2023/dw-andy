@@ -126,10 +126,15 @@ const Home = () => {
   };
 
   return (
-    <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 min-h-screen text-white">
+    <div className="bg-gradient-to-br from-blue-900 via-gray-600 to-gray-900 min-h-screen text-white">
       <div className="max-w-7xl mx-auto p-4">
         <div className="text-center my-8">
-        <h1 className="text-4xl font-bold mb-3">🚀 Bienvenido {username} a Gestion-Proyect</h1>
+          <h1 className="text-4xl font-bold mb-3 
+            bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400
+            bg-clip-text text-transparent animate-gradient">
+            ¡ Hola {username}, bienvenido a Gestion-Proyect !
+          </h1>
+
           <p className="text-lg text-gray-300">
             {userRole === 'admin' ? 'Gestiona y asigna proyectos' : 'Visualiza tus proyectos asignados'}
           </p>

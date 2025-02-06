@@ -192,7 +192,7 @@ function TaskForm({ projectId, task, onSave, onCancel }) {
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="mt-1 block w-full rounded-md bg-gray-700 border-gray-600 text-white"
+              className="mt-1 block w-full rounded-md bg-gray-700 border-gray-600 text-white "
               required
             />
           </div>

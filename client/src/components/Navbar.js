@@ -19,11 +19,11 @@ function Navbar() {
       </div>
 
       {/* Centro: Links de navegación */}
-      <div className="space-x-4">
-        <Link to="/home" className="hover:text-blue-400">
+      <div className="space-x-4  text-2xl">
+        <Link to="/home" className="hover:text-blue-200">
           🏠 Inicio
         </Link>
-        <Link to="/statistics" className="hover:text-blue-400">
+        <Link to="/statistics" className="hover:text-blue-200">
           📊 Estadísticas
         </Link>
       </div>

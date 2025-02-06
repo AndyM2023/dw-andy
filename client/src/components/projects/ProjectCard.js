@@ -5,7 +5,7 @@ function ProjectCard({ project, onEdit, onDelete }) {
   const [showTaskForm, setShowTaskForm] = useState(false);
 
   return (
-    <div className="bg-gray-800 p-4 rounded-lg shadow-lg text-white w-full max-w-md">
+    <div className="bg-gray-700 p-4 rounded-lg shadow-lg text-white w-full max-w-md">
       <h3 className="text-lg font-bold">{project.name}</h3>
       <p className="text-sm text-gray-400">{project.description}</p>
       <p className="text-sm">📅 Inicio: {project.start_date}</p>
