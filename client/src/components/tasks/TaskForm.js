@@ -10,8 +10,10 @@ function TaskForm({ projectId, task, onSave, onCancel }) {
   const [status, setStatus] = useState('Pendiente');
   const [assignedUser, setAssignedUser] = useState('');
   const [users, setUsers] = useState([]);
+  const [project, setProject] = useState(null);
 
   useEffect(() => {
+    fetchProject();
     if (task) {
       setTitle(task.title);
       setDescription(task.description);
@@ -22,7 +24,32 @@ function TaskForm({ projectId, task, onSave, onCancel }) {
       setAssignedUser(task.assigned_to || '');
     }
     fetchProjectUsers();
-  }, [task]);
+  }, [task, projectId]);
+
+  const fetchProject = async () => {
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch(`http://localhost:3001/api/projects/${projectId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setProject(data);
+        console.log("Proyecto obtenido:", data); // Para debug
+      } else {
+        throw new Error('Error al obtener el proyecto');
+      }
+    } catch (error) {
+      console.error('Error al obtener el proyecto:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'No se pudo obtener la información del proyecto'
+      });
+    }
+  };
 
   const fetchProjectUsers = async () => {
     try {
@@ -34,11 +61,7 @@ function TaskForm({ projectId, task, onSave, onCancel }) {
       });
       if (response.ok) {
         const data = await response.json();
-        // Filtrar el usuario ya asignado si estamos editando
-        const filteredUsers = task ? 
-          data.filter(user => !task.assigned_to || user.id === task.assigned_to) : 
-          data;
-        setUsers(filteredUsers);
+        setUsers(data);
       }
     } catch (error) {
       console.error('Error al obtener usuarios del proyecto:', error);
@@ -57,11 +80,44 @@ function TaskForm({ projectId, task, onSave, onCancel }) {
       return;
     }
 
-    if (new Date(startDate) >= new Date(dueDate)) {
+    if (!project) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'No se pudo validar las fechas del proyecto'
+      });
+      return;
+    }
+
+    // Validar que las fechas estén dentro del rango del proyecto
+    const taskStart = new Date(startDate);
+    const taskEnd = new Date(dueDate);
+    const projectStart = new Date(project.start_date);
+    const projectEnd = new Date(project.end_date);
+
+    if (taskStart < projectStart || taskStart > projectEnd) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Fecha inválida',
+        text: 'La fecha de inicio debe estar dentro del período del proyecto'
+      });
+      return;
+    }
+
+    if (taskEnd < projectStart || taskEnd > projectEnd) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Fecha inválida',
+        text: 'La fecha de finalización debe estar dentro del período del proyecto'
+      });
+      return;
+    }
+
+    if (taskStart >= taskEnd) {
       Swal.fire({
         icon: 'warning',
         title: 'Fechas inválidas',
-        text: 'La fecha de inicio debe ser anterior a la fecha de vencimiento'
+        text: 'La fecha de inicio debe ser anterior a la fecha de finalización'
       });
       return;
     }
@@ -118,6 +174,17 @@ function TaskForm({ projectId, task, onSave, onCancel }) {
         <h2 className="text-xl font-bold mb-4 text-white">
           {task ? "Editar Tarea" : "Nueva Tarea"}
         </h2>
+        
+        {project && (
+          <div className="mb-4 p-3 bg-gray-700 rounded-lg">
+            <h3 className="text-sm font-medium text-gray-300 mb-2">Período del Proyecto:</h3>
+            <div className="flex justify-between text-sm text-gray-400">
+              <span>Inicio: {new Date(project.start_date).toLocaleDateString()}</span>
+              <span>Fin: {new Date(project.end_date).toLocaleDateString()}</span>
+            </div>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-300">Título</label>
@@ -162,6 +229,8 @@ function TaskForm({ projectId, task, onSave, onCancel }) {
             <input
               type="date"
               value={startDate}
+              min={project?.start_date?.split('T')[0]}
+              max={project?.end_date?.split('T')[0]}
               onChange={(e) => setStartDate(e.target.value)}
               className="mt-1 block w-full rounded-md bg-gray-700 border-gray-600 text-white"
               required
@@ -173,6 +242,8 @@ function TaskForm({ projectId, task, onSave, onCancel }) {
             <input
               type="date"
               value={dueDate}
+              min={project?.start_date?.split('T')[0]}
+              max={project?.end_date?.split('T')[0]}
               onChange={(e) => setDueDate(e.target.value)}
               className="mt-1 block w-full rounded-md bg-gray-700 border-gray-600 text-white"
               required

@@ -1,8 +1,6 @@
 const Project = require('../models/Project');
 const ProjectUser = require('../models/ProjectUser');
 const User = require('../models/User');
-
-//nuevo
 const { Op } = require('sequelize');
 
 
@@ -186,7 +184,6 @@ const getProjectUsers = async (req, res) => {
   }
 };
 
-
 const getProjectById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -194,7 +191,7 @@ const getProjectById = async (req, res) => {
       include: [
         {
           model: User,
-          through: { attributes: [] }, // Para no mostrar los datos intermedios
+          through: { attributes: [] },
         },
       ],
     });
@@ -209,6 +206,7 @@ const getProjectById = async (req, res) => {
     res.status(500).json({ error: "Error al obtener el proyecto" });
   }
 };
+
 
 const deleteProject = async (req, res) => {
   try {

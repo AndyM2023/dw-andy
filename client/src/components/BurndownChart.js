@@ -161,6 +161,11 @@ function BurndownChart({ tasks, startDate, endDate }) {
         tooltip.style("top", `${event.pageY - 20}px`).style("left", `${event.pageX + 10}px`);
       })
       .on("mouseout", () => tooltip.style("visibility", "hidden"));
+
+    // Limpiar tooltip al desmontar
+    return () => {
+      d3.select("body").selectAll("div.tooltip").remove();
+    };
   }, [tasks, startDate, endDate]);
 
   return (
