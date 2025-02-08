@@ -8,6 +8,7 @@
   .btn-primary {
     @apply bg-blue-500 hover:bg-blue-600;
   }
+  
   .btn-danger {
     @apply bg-red-500 hover:bg-red-600;
   }
@@ -47,6 +48,8 @@
 }
 
 .animate-gradient {
-  background-size: 200% 200%;
-  animation: gradient-animation 1s infinite alternate;
+  background-size: 150% 200%;
+  animation: gradient-animation 2s infinite alternate;
 }
+
+
