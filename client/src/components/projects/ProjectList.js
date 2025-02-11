@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
+import { Link } from 'react-router-dom';
 import TaskForm from '../tasks/TaskForm';
 import { AuthContext } from '../../context/AuthContext';
 import UserAssignmentForm from './UserAssignmentForm';
@@ -17,7 +18,6 @@ function ProjectList({ projects = [], onEdit, onDelete }) {
       Promise.all(projects.map(project => fetchTasks(project.id)));
     }
   }, [projects]);
-  
 
   const fetchTasks = async (projectId) => {
     try {
@@ -28,7 +28,10 @@ function ProjectList({ projects = [], onEdit, onDelete }) {
         }
       });
       const data = await response.json();
-      setTasks(prevTasks => ({ ...prevTasks, [projectId]: Array.isArray(data) ? data : [] }));
+      setTasks(prevTasks => ({ 
+        ...prevTasks, 
+        [projectId]: Array.isArray(data) ? data : [] 
+      }));
     } catch (error) {
       console.error(`❌ Error al obtener tareas para el proyecto ${projectId}:`, error);
     }
@@ -87,164 +90,208 @@ function ProjectList({ projects = [], onEdit, onDelete }) {
     setShowAssignForm(projectId);
   };
 
+  const getActiveTasks = (projectTasks) => {
+    const active = projectTasks?.filter(task => task.status !== 'Completada') || [];
+    return active.sort((a, b) => {
+      const priorityOrder = { 'Alta': 1, 'Media': 2, 'Baja': 3 };
+      return priorityOrder[a.priority] - priorityOrder[b.priority];
+    });
+  };
+
+  const calculateDaysLeft = (dueDate) => {
+    const today = new Date();
+    const due = new Date(dueDate);
+    const diffTime = due - today;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays < 0) return 'Vencida';
+    if (diffDays === 0) return 'Vence hoy';
+    return `${diffDays} días restantes`;
+  };
+
+  const getCompletedTasks = (projectTasks) => {
+    return projectTasks?.filter(task => task.status === 'Completada') || [];
+  };
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 gap-6">
       {projects.length === 0 ? (
         <div className="col-span-full text-center p-4">
           <p className="text-gray-500">No hay proyectos disponibles.</p>
         </div>
       ) : (
         projects.map(project => (
-          <div key={project.id} className=" rounded-xl shadow-lg overflow-hidden hover:shadow-3xl transition-shadow p-2 border-4 border-gray-700 ">
-            <h3 className="text-2xl font-bold mb-2 text-white">{project.name}</h3>
-            <p className="text-gray-400 text-sm">{project.description}</p>
-            
-            <div className="space-y-2 text-sm text-gray-400 mt-4">
-              <div className="flex justify-between">
-                <span>📅 Inicio:</span>
-                <span>{new Date(project.start_date).toLocaleDateString()}</span>
+          <div key={project.id} className="flex gap-4">
+
+
+            <div className="w-1/3 bg-gray-800 rounded-xl shadow-lg p-6 border-4 border-gray-700">
+              <h3 className="text-2xl font-bold mb-2 text-white">{project.name}</h3>
+              <p className="text-gray-400 text-sm">{project.description}</p>
+              
+              <div className="space-y-2 text-sm text-gray-400 mt-4">
+                <div className="flex justify-between">
+                  <span>📅 Inicio:</span>
+                  <span>{new Date(project.start_date).toLocaleDateString()}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>🏁 Fin:</span>
+                  <span>{new Date(project.end_date).toLocaleDateString()}</span>
+                </div>
               </div>
-              <div className="flex justify-between">
-                <span>🏁 Fin:</span>
-                <span>{new Date(project.end_date).toLocaleDateString()}</span>
-              </div>
-            </div>
 
-            <div className="mt-4">
-              <h4 className="text-white font-semibold mb-2">👥 Usuarios Asignados:</h4>
-              <div className="flex flex-wrap gap-2">
-                {project.Users?.map(user => (
-                  <span key={user.id} className="bg-blue-500 text-white px-2 py-1 rounded-full text-sm">
-                    {user.username}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <div className="mt-5 flex flex-col gap-3">
-              {isAdmin && (
-                <>
-                  <button
-                    onClick={() => onEdit(project)}
-                    className="px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition w-full"
-                  >
-                    ✏️ Editar Proyecto
-                  </button>
-                  <button
-                    onClick={() => onDelete(project.id)}
-                    className="px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition w-full"
-                  >
-                    🗑️ Eliminar Proyecto
-                  </button>
-                  <button
-                    onClick={() => handleAssignUsers(project.id)}
-                    className="px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition w-full"
-                  >
-                    👥 Asignar Usuarios
-                  </button>
-                  <button
-                    onClick={() => {
-                      setEditingTask(null);
-                      setShowTaskForm(project.id);
-                    }}
-                    className="px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition w-full"
-                  >
-                    ➕ Añadir Tarea
-                  </button>
-                </>
-              )}
-            </div>
-
-            {showAssignForm === project.id && (
-              <UserAssignmentForm
-                projectId={project.id}
-                onClose={() => setShowAssignForm(null)}
-                onAssign={() => {
-                  setShowAssignForm(null);
-                }}
-              />
-            )}
-
-            {(showTaskForm === project.id || editingTask) && userRole === 'admin' && (
-              <TaskForm
-                projectId={project.id}
-                task={editingTask}
-                onSave={() => {
-                  setShowTaskForm(null);
-                  setEditingTask(null);
-                  fetchTasks(project.id);
-                }}
-                onCancel={() => {
-                  setShowTaskForm(null);
-                  setEditingTask(null);
-                }}
-              />
-            )}
-
-            <div className="mt-6">
-              <h4 className="text-xl font-bold text-white mb-3">📋 Tareas</h4>
-              {Array.isArray(tasks[project.id]) && tasks[project.id].length === 0 ? (
-                <p className="text-gray-400">No hay tareas asignadas.</p>
-              ) : (
-                <ul className="space-y-3">
-                  {Array.isArray(tasks[project.id]) && tasks[project.id].map(task => (
-                    <li key={task.id} className="bg-gray-800 p-4 rounded-lg border border-gray-700 shadow-md">
-                      <div className="mb-4">
-                        <p className="text-white font-semibold">{task.title}</p>
-                        <p className="text-gray-400 text-sm">{task.description}</p>
-                        <div className="grid grid-cols-2 gap-2 mt-2">
-                          <p className="text-sm text-gray-400">📅 Inicio: {new Date(task.start_date).toLocaleDateString()}</p>
-                          <p className="text-sm text-gray-400">🏁 Fin: {new Date(task.due_date).toLocaleDateString()}</p>
-                        </div>
-                        <p className="text-sm text-yellow-400">📌 Prioridad: {task.priority}</p>
-                        <p className="text-sm text-green-400">📋 Estado: {task.status}</p>
-                        {task.assigned_to && (
-                          <p className="text-sm text-blue-400">👤 Asignado a: {task.assigned_username}</p>
-                        )}
-                      </div>
-                      <div className="flex gap-3 mt-4">
-                        
-                      {(isAdmin || Number(userId) === Number(task.assigned_to)) && ( 
-                          <select
-                          
-                            value={task.status}
-                            onChange={(e) => handleUpdateTaskStatus(task.id, e.target.value, project.id)}
-                            className="px-4 py-2 bg-gray-700 text-white rounded-lg"
-                          >
-                            <option value="Pendiente">Pendiente</option>
-                            <option value="En Progreso">En Progreso</option>
-                            <option value="Completada">Completada</option>
-
-                          </select>
-                          
-                        )}
-                        {isAdmin && (
-                          <>
-                            <button
-                              className="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition flex-1"
-                              onClick={() => {
-                                setEditingTask(task);
-                                setShowTaskForm(project.id);
-                              }}
-                            >
-                              ✏️ Editar Tarea
-                            </button>
-                            <button
-                              className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition flex-1"
-                              onClick={() => handleDeleteTask(task.id, project.id)}
-                            >
-                              🗑️ Eliminar Tarea
-                            </button>
-                          </>
-                        )}
-                      </div>
-                    </li>
+              <div className="mt-4">
+                <h4 className="text-white font-semibold mb-2">👥 Usuarios Asignados:</h4>
+                <div className="flex flex-wrap gap-2">
+                  {project.Users?.map(user => (
+                    <span key={user.id} className="bg-blue-800 text-white px-2 py-1 rounded-full text-sm">
+                      {user.username}
+                    </span>
                   ))}
-                </ul>
-              )}
+                </div>
+              </div>
+
+              <div className="mt-5 grid grid-cols-2 gap-2 justify-center w-full">
+                {isAdmin && (
+                  <>
+                    <button
+                      onClick={() => onEdit(project)}
+                      className="px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                    >
+                      ✏️
+                    </button>
+                    <button
+                      onClick={() => onDelete(project.id)}
+                      className="px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+                    >
+                      🗑️ 
+                    </button>
+                    <button
+                      onClick={() => handleAssignUsers(project.id)}
+                      className="px-4 py-3 bg-purple-300 text-white rounded-lg hover:bg-purple-700 transition"
+                    >
+                      ➕👥
+                    </button>
+                    <button
+                      onClick={() => {
+                        setEditingTask(null);
+                        setShowTaskForm(project.id);
+                      }}
+                      className="px-4 py-3 bg-green-200 text-white rounded-lg hover:bg-green-700 transition"
+                    >
+                      ➕ 📝
+                    </button>
+                  </>
+                )}
+                <Link
+                  to={`/project/${project.id}/completed-tasks`}
+                          className="col-span-2 px-4 py-3 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition text-center"
+                >
+                  📋 Ver Tareas Completadas ({getCompletedTasks(tasks[project.id]).length})
+                </Link>
+              </div>
+            </div>
+
+            {/* Tareas Activas */}
+            <div className="w-2/3 bg-gray-800 rounded-xl p-6 h-[500px] overflow-y-auto">
+              <h4 className="text-xl font-bold text-white mb-4">📋 Tareas Activas</h4>
+              <div className="space-y-4">
+                {getActiveTasks(tasks[project.id]).map(task => (
+                  <div key={task.id} className="bg-gray-700 p-4 rounded-lg border border-gray-600">
+                    <div className="mb-2">
+                      <div className="flex justify-between items-center">
+                        <h5 className="text-lg font-semibold text-white">{task.title}</h5>
+                        <span className={`px-2 py-1 rounded text-sm ${
+                          task.priority === 'Alta' ? 'bg-red-500' :
+                          task.priority === 'Media' ? 'bg-yellow-500' : 'bg-green-500'
+                        }`}>
+                          {task.priority}
+                        </span>
+                      </div>
+                      <p className="text-gray-300 text-sm">{task.description}</p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-sm text-gray-300 mb-3">
+                      <p>📅 Inicio: {new Date(task.start_date).toLocaleDateString()}</p>
+                      <p>🏁 Fin: {new Date(task.due_date).toLocaleDateString()}</p>
+                      <p>⏳ {calculateDaysLeft(task.due_date)}</p>
+                      <p>📋 Estado: {task.status}</p>
+                      {task.assigned_to && (
+                        <p className="col-span-2">👤 Asignado a: {task.assigned_username}</p>
+                      )}
+                    </div>
+                    <div className="flex gap-2 justify-center items-center">
+                      {(isAdmin || Number(userId) === Number(task.assigned_to)) && (
+                        <select
+                          value={task.status}
+                          onChange={(e) => handleUpdateTaskStatus(task.id, e.target.value, project.id)}
+                          className="px-3 py-1 bg-gray-600 text-white rounded"
+                        >
+                          <option value="Pendiente">Pendiente</option>
+                          <option value="En Progreso">En Progreso</option>
+                          <option value="Completada">Completada</option>
+                        </select>
+                      )}
+                      {isAdmin && (
+                        <>
+                          <button
+                            onClick={() => {
+                              setEditingTask(task);
+                              setShowTaskForm(project.id);
+                            }}
+                            className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+                          >
+                            ✏️ 
+                          </button>
+                          <button
+                            onClick={() => handleDeleteTask(task.id, project.id)}
+                            className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                          >
+                            🗑️ 
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                {getActiveTasks(tasks[project.id]).length === 0 && (
+                  <div className="text-center py-8">
+                    <img 
+                      src={process.env.PUBLIC_URL + '/images/tareaspendientes.png'} 
+                      alt="No hay tareas activas" 
+                      className="mx-auto w-50 h-60 mb-8 opacity-50"
+                    />
+                    <p className="text-2xl ">No hay tareas activas por el momento😥 </p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         ))
+      )}
+
+      {showAssignForm && (
+        <UserAssignmentForm
+          projectId={showAssignForm}
+          onClose={() => setShowAssignForm(null)}
+          onAssign={() => {
+            setShowAssignForm(null);
+          }}
+        />
+      )}
+
+      {(showTaskForm || editingTask) && (
+        <TaskForm
+          projectId={showTaskForm}
+          task={editingTask}
+          onSave={() => {
+            setShowTaskForm(null);
+            setEditingTask(null);
+            fetchTasks(showTaskForm);
+          }}
+          onCancel={() => {
+            setShowTaskForm(null);
+            setEditingTask(null);
+          }}
+        />
       )}
     </div>
   );

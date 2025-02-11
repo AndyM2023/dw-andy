@@ -1,18 +1,19 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { Route, Routes, Navigate } from 'react-router-dom';
 import { AuthContext } from './context/AuthContext';
-import { getProjects } from './api/projectService'; // ✅ Importar el servicio de proyectos
+import { getProjects } from './api/projectService';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import Home from './pages/Home';
-import Statistics from './pages/Statistics'; 
-import ProjectDetails from './components/projects/ProjectDetails'; 
-import Navbar from "./components/Navbar"; // ✅ Importar Navbar
+import Statistics from './pages/Statistics';
+import ProjectDetails from './components/projects/ProjectDetails';
+import CompletedTasks from './pages/CompletedTasks';
+import Navbar from "./components/Navbar";
 
 function App() {
   const { isAuthenticated, login } = useContext(AuthContext);
   const [isLogin, setIsLogin] = useState(true);
-  const [projects, setProjects] = useState([]); // ✅ Estado para almacenar proyectos
+  const [projects, setProjects] = useState([]);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -33,14 +34,15 @@ function App() {
 
   return (
     <div>
-      {isAuthenticated && <Navbar />} {/* ✅ Muestra el Navbar solo si el usuario está autenticado */}
+      {isAuthenticated && <Navbar />}
 
       <Routes>
         {isAuthenticated ? (
           <>
             <Route path="/home" element={<Home />} />
-            <Route path="/statistics" element={<Statistics projects={projects} />} /> {/* ✅ Pasar proyectos */}
-            <Route path="/project/:id" element={<ProjectDetails projects={projects} />} /> {/* ✅ Pasar proyectos */}
+            <Route path="/statistics" element={<Statistics projects={projects} />} />
+            <Route path="/project/:id" element={<ProjectDetails projects={projects} />} />
+            <Route path="/project/:projectId/completed-tasks" element={<CompletedTasks />} />
             <Route path="*" element={<Navigate to="/home" />} />
           </>
         ) : (
