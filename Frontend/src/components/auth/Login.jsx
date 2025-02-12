@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import Swal from "sweetalert2";
+import PropTypes from "prop-types";
 
 const Login = ({ onLogin }) => {
   const [username, setUsername] = useState("");
@@ -94,6 +95,9 @@ const Login = ({ onLogin }) => {
       </button>
     </form>
   );
+};
+Login.propTypes = {
+  onLogin: PropTypes.func.isRequired,
 };
 
 export default Login;

@@ -1,14 +1,14 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect} from "react";
 import BurndownChart from "../components/BurndownChart";
 import GanttChart from "../components/GanttChart";
 import PriorityFilter from "../components/PriorityFilter";
-import { AuthContext } from "../context/AuthContext";
+//import { AuthContext } from "../context/AuthContext";
 
 function Statistics() {
   const [projects, setProjects] = useState([]);
   const [tasksByProject, setTasksByProject] = useState({});
   const [selectedPriority, setSelectedPriority] = useState("Todas");
-  const { userRole } = useContext(AuthContext);
+  //const { userRole } = useContext(AuthContext);
 
   useEffect(() => {
     fetchProjects();

@@ -14,7 +14,7 @@ const validateLogin = (req, res, next) => {
       .json({ error: "Username and password are required" });
   }
 
-  next(); // Si todo está bien, pasar al siguiente middleware o ruta
+  next(); 
 };
 
 // Middleware para validar el registro
@@ -53,7 +53,7 @@ const validateRegister = (req, res, next) => {
       .json({ error: "Por favor ingrese un correo válido." });
   }
 
-  next(); // Si todo está bien, pasar al siguiente middleware o ruta
+  next(); 
 };
 
 module.exports = { validateLogin, validateRegister };

@@ -1,6 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
-//import { getProjects, createProject, updateProject, deleteProject } from "../api/projectService";
 import ProjectList from "../components/projects/ProjectList";
 import ProjectForm from "../components/projects/ProjectForm";
 import { useNavigate } from "react-router-dom";
