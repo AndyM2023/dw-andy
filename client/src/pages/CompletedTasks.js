@@ -59,11 +59,11 @@ function CompletedTasks() {
 
         <div className="space-y-4">
           {completedTasks.length === 0 ? (
-            <div className="text-center py-8">
+        <div className="flex flex-col items-center justify-center text-center py-8">
               <img 
                   src={process.env.PUBLIC_URL + '/images/tareanocompletada.png'} 
                 alt="No hay tareas completadas" 
-                className="mx-auto w-70 h-70 mb-4 "
+                className="mx-auto w-70 h-70 mb-4  "
               />
               <p className="text-gray-400 text-3xl">No hay tareas completadas</p>
             </div>

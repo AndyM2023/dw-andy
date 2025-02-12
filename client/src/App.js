@@ -34,7 +34,7 @@ function App() {
 
   return (
     <div>
-      {isAuthenticated && <Navbar />}
+      <Navbar showAuthLinks={isAuthenticated} />
 
       <Routes>
         {isAuthenticated ? (
@@ -46,35 +46,32 @@ function App() {
             <Route path="*" element={<Navigate to="/home" />} />
           </>
         ) : (
-          <>
-            <Route path="/" element={
-              <section className="flex justify-center items-center min-h-screen bg-gradient-to-r from-blue-200 to-gray-800">
-                <div className="w-full max-w-lg p-8 bg-white rounded-lg shadow-lg">
-                  <div className="text-center mb-6">
-                    <h2 className="text-3xl font-bold text-gray-800">
-                      {isLogin ? 'Iniciar Sesión' : 'Registrarse'}
-                    </h2>
-                  </div>
-                  <div className="flex space-x-1 mb-6">
-                    <button
-                      className={`w-full py-2 rounded-md text-lg font-semibold ${isLogin ? 'bg-blue-500 text-white' : 'bg-gray-300'}`}
-                      onClick={() => setIsLogin(true)}
-                    >
-                      Iniciar Sesión
-                    </button>
-                    <button
-                      className={`w-full py-2 rounded-md text-lg font-semibold ${!isLogin ? 'bg-blue-500 text-white' : 'bg-gray-300'}`}
-                      onClick={() => setIsLogin(false)}
-                    >
-                      Registrarse
-                    </button>
-                  </div>
-                  {isLogin ? <Login onLogin={login} /> : <Register />}
+          <Route path="/" element={
+            <section className="flex flex-col items-center min-h-screen bg-gradient-to-r from-gray-600 to-gray-900">
+              <div className="w-full max-w-lg p-8 bg-white/20 rounded-lg shadow-lg mt-20">
+                <div className="text-center mb-6">
+                  <h2 className="text-3xl font-bold text-gray-800">
+                    {isLogin ? 'Iniciar Sesión' : 'Registrarse'}
+                  </h2>
                 </div>
-              </section>
-            } />
-            <Route path="*" element={<Navigate to="/" />} />
-          </>
+                <div className="flex space-x-1 mb-6">
+                  <button
+                    className={`w-full py-2 rounded-md text-lg font-semibold ${isLogin ? 'bg-blue-500 text-white' : 'bg-gray-300'}`}
+                    onClick={() => setIsLogin(true)}
+                  >
+                    Iniciar Sesión
+                  </button>
+                  <button
+                    className={`w-full py-2 rounded-md text-lg font-semibold ${!isLogin ? 'bg-blue-500 text-white' : 'bg-gray-300'}`}
+                    onClick={() => setIsLogin(false)}
+                  >
+                    Registrarse
+                  </button>
+                </div>
+                {isLogin ? <Login onLogin={login} /> : <Register />}
+              </div>
+            </section>
+          } />
         )}
       </Routes>
     </div>

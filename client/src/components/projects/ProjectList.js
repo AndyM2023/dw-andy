@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import TaskForm from '../tasks/TaskForm';
 import { AuthContext } from '../../context/AuthContext';
 import UserAssignmentForm from './UserAssignmentForm';
+import UserRemovalForm from './UserRemovalForm';
 import Swal from 'sweetalert2';
 
 function ProjectList({ projects = [], onEdit, onDelete }) {
@@ -12,7 +13,8 @@ function ProjectList({ projects = [], onEdit, onDelete }) {
   const [editingTask, setEditingTask] = useState(null);
   const [showAssignForm, setShowAssignForm] = useState(null);
   const isAdmin = userRole === 'admin';
-  
+  const [showRemoveForm, setShowRemoveForm] = useState(null);
+
   useEffect(() => {
     if (projects.length > 0) {
       Promise.all(projects.map(project => fetchTasks(project.id)));
@@ -90,6 +92,44 @@ function ProjectList({ projects = [], onEdit, onDelete }) {
     setShowAssignForm(projectId);
   };
 
+
+  const handleRemoveUser = async (projectId, userId) => {
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch(`http://localhost:3001/api/projects/${projectId}/users/${userId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Usuario removido',
+          text: 'El usuario ha sido removido exitosamente del proyecto',
+          timer: 3000
+          
+        });
+        window.location.reload();
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'No se puede remover el usuario',
+          text: data.error || 'El usuario tiene tareas pendientes o en progreso'
+        });
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Error al remover el usuario del proyecto'
+      });
+    }
+  };
+
   const getActiveTasks = (projectTasks) => {
     const active = projectTasks?.filter(task => task.status !== 'Completada') || [];
     return active.sort((a, b) => {
@@ -117,13 +157,16 @@ function ProjectList({ projects = [], onEdit, onDelete }) {
     <div className="grid grid-cols-1 gap-6">
       {projects.length === 0 ? (
         <div className="col-span-full text-center p-4">
-          <p className="text-gray-500">No hay proyectos disponibles.</p>
+          <p className="text-gray-500 text-2xl mb-8">No hay proyectos disponibles.</p>
+          <img 
+                      src={process.env.PUBLIC_URL + '/images/noproject.png'} 
+                      alt="No hay tareas activas" 
+                      className="mx-auto w-60 h-60 mb-8 opacity-50"
+                    />
         </div>
       ) : (
         projects.map(project => (
           <div key={project.id} className="flex gap-4">
-
-
             <div className="w-1/3 bg-gray-800 rounded-xl shadow-lg p-6 border-4 border-gray-700">
               <h3 className="text-2xl font-bold mb-2 text-white">{project.name}</h3>
               <p className="text-gray-400 text-sm">{project.description}</p>
@@ -143,9 +186,18 @@ function ProjectList({ projects = [], onEdit, onDelete }) {
                 <h4 className="text-white font-semibold mb-2">👥 Usuarios Asignados:</h4>
                 <div className="flex flex-wrap gap-2">
                   {project.Users?.map(user => (
-                    <span key={user.id} className="bg-blue-800 text-white px-2 py-1 rounded-full text-sm">
+                    <div key={user.id} className="bg-blue-800 text-white px-3 py-1 rounded-full text-sm flex items-center gap-2">
                       {user.username}
-                    </span>
+                      {isAdmin && (
+                        <button
+                          onClick={() => handleRemoveUser(project.id, user.id)}
+                          className="hover:text-red-400 transition-colors"
+                          title="Remover usuario"
+                        >
+                          ×
+                        </button>
+                      )}
+                    </div>
                   ))}
                 </div>
               </div>
@@ -182,12 +234,13 @@ function ProjectList({ projects = [], onEdit, onDelete }) {
                     </button>
                   </>
                 )}
-                <Link
-                  to={`/project/${project.id}/completed-tasks`}
-                          className="col-span-2 px-4 py-3 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition text-center"
-                >
-                  📋 Ver Tareas Completadas ({getCompletedTasks(tasks[project.id]).length})
-                </Link>
+              <Link
+                    to={`/project/${project.id}/completed-tasks`}
+                    className="px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition col-span-full flex justify-center"
+                  >
+                    📋✅ ({getCompletedTasks(tasks[project.id]).length})
+                  </Link>
+
               </div>
             </div>
 
@@ -259,7 +312,7 @@ function ProjectList({ projects = [], onEdit, onDelete }) {
                       alt="No hay tareas activas" 
                       className="mx-auto w-50 h-60 mb-8 opacity-50"
                     />
-                    <p className="text-2xl ">No hay tareas activas por el momento😥 </p>
+                    <p className="text-2xl ">No hay tareas activas por el momento </p>
                   </div>
                 )}
               </div>
@@ -290,6 +343,17 @@ function ProjectList({ projects = [], onEdit, onDelete }) {
           onCancel={() => {
             setShowTaskForm(null);
             setEditingTask(null);
+          }}
+        />
+      )}
+
+      {showRemoveForm && (
+        <UserRemovalForm
+          projectId={showRemoveForm}
+          onClose={() => setShowRemoveForm(null)}
+          onRemove={() => {
+            setShowRemoveForm(null);
+            window.location.reload();
           }}
         />
       )}

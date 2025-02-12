@@ -7,6 +7,7 @@ const Register = ({ onRegister }) => {
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -63,20 +64,20 @@ const Register = ({ onRegister }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-lg">
+    <form onSubmit={handleSubmit} >
       <div className="mb-4">
-        <label htmlFor="username" className="block text-gray-700">Usuario</label>
+        <label htmlFor="username" className="block text-white">Usuario</label>
         <input type="text" id="username" value={username} placeholder="Ingrese su usuario" onChange={(e) => setUsername(e.target.value)} className="w-full p-2 border rounded-md" required />
       </div>
 
       <div className="mb-4">
-        <label htmlFor="password" className="block text-gray-700">Contraseña</label>
+        <label htmlFor="password" className="block text-white">Contraseña</label>
         <input type="password" id="password" value={password} placeholder="Ingrese su contraseña" onChange={(e) => setPassword(e.target.value)} className="w-full p-2 border rounded-md" required />
       </div>
 
       <div className="mb-4">
-        <label htmlFor="confirmPassword" className="block text-gray-700">Confirmar Contraseña</label>
-        <input type="password" id="confirmPassword" value={confirmPassword} placeholder="Ingrese nuevamente su contraseña"onChange={(e) => setConfirmPassword(e.target.value)} className="w-full p-2 border rounded-md" required />
+        <label htmlFor="confirmPassword" className="block text-white">Confirmar Contraseña</label>
+        <input type="password" id="confirmPassword" value={confirmPassword} placeholder="Ingrese nuevamente su contraseña"onChange={(e) => setConfirmPassword(e.target.value)} className="w-full p-2 border rounded-md" required autoComplete="new-password"/>
       </div>
 
       {error && <p className="text-red-500">{error}</p>}

@@ -20,7 +20,6 @@ function BurndownChart({ tasks, startDate, endDate }) {
       .append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    // Convertir fechas
     const parseDate = d3.timeParse("%Y-%m-%dT%H:%M:%S.%LZ");
     const projectStart = new Date(startDate);
     const projectEnd = new Date(endDate);
@@ -28,11 +27,9 @@ function BurndownChart({ tasks, startDate, endDate }) {
 
     const totalTasks = tasks.length;
 
-    // Escalas
     const xScale = d3.scaleTime().domain([projectStart, projectEnd]).range([0, width]);
     const yScale = d3.scaleLinear().domain([0, totalTasks]).range([height, 0]);
 
-    // Ejes
     const xAxis = d3.axisBottom(xScale).ticks(8).tickFormat(d3.timeFormat("%b %d"));
     const yAxis = d3.axisLeft(yScale);
 
@@ -44,7 +41,6 @@ function BurndownChart({ tasks, startDate, endDate }) {
 
     svg.append("g").call(yAxis).selectAll("text").style("fill", "#ccc");
 
-    // Etiquetas de ejes
     svg.append("text")
       .attr("x", width / 2)
       .attr("y", height + 40)
@@ -62,7 +58,6 @@ function BurndownChart({ tasks, startDate, endDate }) {
       .attr("transform", "rotate(-90)")
       .text("📌 Tareas Pendientes");
 
-    // Línea ideal (Burndown)
     const idealBurndown = [
       { date: projectStart, tasksLeft: totalTasks },
       { date: projectEnd, tasksLeft: 0 },
@@ -81,23 +76,39 @@ function BurndownChart({ tasks, startDate, endDate }) {
       .attr("stroke-dasharray", "5,5")
       .attr("d", lineGenerator);
 
-    // Línea real (Burndown Actual)
     const actualBurndown = [];
     let remainingTasks = totalTasks;
 
     const sortedTasks = tasks
       .map(task => ({
         ...task,
-        date: parseDate(task.due_date),
+        date: task.status === "Completada" ? 
+          new Date(task.updatedAt) : 
+          parseDate(task.due_date),   
+        isCompleted: task.status === "Completada"
       }))
       .sort((a, b) => a.date - b.date);
 
     sortedTasks.forEach(task => {
-      if (task.status === "Completada") {
+      if (task.isCompleted) {
         remainingTasks -= 1;
       }
-      actualBurndown.push({ date: task.date, tasksLeft: remainingTasks });
+      actualBurndown.push({
+        date: task.date,
+        tasksLeft: remainingTasks,
+        task: task
+      });
     });
+
+    if (actualBurndown.length > 0) {
+      const lastPoint = actualBurndown[actualBurndown.length - 1];
+      if (today > lastPoint.date) {
+        actualBurndown.push({
+          date: today,
+          tasksLeft: remainingTasks
+        });
+      }
+    }
 
     const pathActual = svg.append("path")
       .datum(actualBurndown)
@@ -115,7 +126,6 @@ function BurndownChart({ tasks, startDate, endDate }) {
       .ease(d3.easeLinear)
       .attr("stroke-dashoffset", 0);
 
-    // Puntos de la línea real con colores según estado
     svg.selectAll("circle")
       .data(actualBurndown)
       .enter()
@@ -124,15 +134,13 @@ function BurndownChart({ tasks, startDate, endDate }) {
       .attr("cy", d => yScale(d.tasksLeft))
       .attr("r", 5)
       .attr("fill", d => {
-        const task = tasks.find(task => parseDate(task.due_date).getTime() === d.date.getTime());
-        if (!task) return "#ccc";
-        if (task.status === "Completada") return "#10B981"; // Verde
-        if (d.date < today) return "#EF4444"; // Rojo (Atrasada)
-        return "#3B82F6"; // Azul (En progreso)
+        if (!d.task) return "#ccc";
+        if (d.task.status === "Completada") return "#10B981";
+        if (d.date < today) return "#EF4444";
+        return "#3B82F6";
       })
       .attr("stroke", "white");
 
-    // Tooltip con estado de la tarea
     const tooltip = d3.select("body")
       .append("div")
       .style("position", "absolute")
@@ -144,25 +152,37 @@ function BurndownChart({ tasks, startDate, endDate }) {
 
     svg.selectAll("circle")
       .on("mouseover", (event, d) => {
-        const task = tasks.find(task => parseDate(task.due_date).getTime() === d.date.getTime());
-        let estado = "⏳ En progreso";
-        if (task) {
-          if (task.status === "Completada") estado = "✅ Completada a tiempo";
-          else if (d.date < today) estado = "❌ Atrasada";
+        let tooltipContent = `
+          📅 ${d3.timeFormat("%b %d")(d.date)}<br>
+          📌 ${d.tasksLeft} tareas restantes<br>
+        `;
+        
+        if (d.task) {
+          let estado = d.task.status === "Completada" ? "✅ Completada" :
+                      d.date < today ? "❌ Atrasada" : "⏳ En progreso";
+          tooltipContent += `⚠️ Estado: <strong>${estado}</strong><br>`;
+          
+          if (d.task.status === "Completada" && d.task.updatedAt) {
+            const completionDate = new Date(d.task.updatedAt);
+            tooltipContent += `🗓️ Completada el: ${d3.timeFormat("%b %d, %Y")(completionDate)}<br>`;
+          }
+
+          // **NUEVO: Agregar nombre y prioridad de la tarea**
+          tooltipContent += `📝 Tarea: <strong>${d.task.title}</strong><br>`;
+          tooltipContent += `🔺 Prioridad: <strong>${d.task.priority}</strong>`;
         }
-        tooltip.style("visibility", "visible")
-          .html(`
-            📅 ${d3.timeFormat("%b %d")(d.date)}<br>
-            📌 ${d.tasksLeft} tareas restantes <br>
-            ⚠️ Estado: <strong>${estado}</strong>
-          `);
+        
+        tooltip
+          .style("visibility", "visible")
+          .html(tooltipContent);
       })
       .on("mousemove", event => {
-        tooltip.style("top", `${event.pageY - 20}px`).style("left", `${event.pageX + 10}px`);
+        tooltip
+          .style("top", `${event.pageY - 20}px`)
+          .style("left", `${event.pageX + 10}px`);
       })
       .on("mouseout", () => tooltip.style("visibility", "hidden"));
 
-    // Limpiar tooltip al desmontar
     return () => {
       d3.select("body").selectAll("div.tooltip").remove();
     };
@@ -171,7 +191,6 @@ function BurndownChart({ tasks, startDate, endDate }) {
   return (
     <div className="flex justify-center">
       <div className="bg-gray-900 p-6 rounded-lg shadow-md text-center">
-        <h2 className="text-white text-xl font-bold mb-3">📉 Diagrama de Burndown</h2>
         <svg ref={svgRef}></svg>
       </div>
     </div>
@@ -179,3 +198,6 @@ function BurndownChart({ tasks, startDate, endDate }) {
 }
 
 export default BurndownChart;
+
+
+

@@ -115,7 +115,7 @@ const GanttChart = ({ tasks }) => {
 
   return (
     <div className="bg-gray-900 p-6 rounded-lg shadow-md text-center">
-      <h2 className="text-white text-xl font-bold mb-3">📊 Diagrama de Gantt</h2>
+
       <svg ref={svgRef}></svg>
     </div>
   );

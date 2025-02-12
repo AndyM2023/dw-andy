@@ -1,15 +1,14 @@
 const Project = require('../models/Project');
 const ProjectUser = require('../models/ProjectUser');
 const User = require('../models/User');
+const Task = require('../models/Task');
 const { Op } = require('sequelize');
 
 
-// Nueva función para obtener usuarios no asignados
 const getUnassignedUsers = async (req, res) => {
   try {
     const { projectId } = req.params;
     
-    // Obtener IDs de usuarios ya asignados al proyecto
     const assignedUsers = await ProjectUser.findAll({
       where: { project_id: projectId },
       attributes: ['user_id']
@@ -17,7 +16,6 @@ const getUnassignedUsers = async (req, res) => {
     
     const assignedUserIds = assignedUsers.map(u => u.user_id);
 
-    // Obtener usuarios no asignados
     const unassignedUsers = await User.findAll({
       where: {
         id: {
@@ -34,13 +32,49 @@ const getUnassignedUsers = async (req, res) => {
   }
 };
 
-//----------------------------------------------------------------
+const removeUserFromProject = async (req, res) => {
+  try {
+    const { projectId, userId } = req.params;
+
+    // Verificar si el usuario tiene tareas asignadas
+    const activeTasks = await Task.findOne({
+      where: {
+        project_id: projectId,
+        assigned_to: userId,
+        status: {
+          [Op.notIn]: ['Completada']
+        }
+      }
+    });
+
+    if (activeTasks) {
+      return res.status(400).json({
+        error: 'No se puede remover el usuario porque tiene tareas pendientes o en progreso'
+      });
+    }
+
+    const deleted = await ProjectUser.destroy({
+      where: {
+        project_id: projectId,
+        user_id: userId
+      }
+    });
+
+    if (!deleted) {
+      return res.status(404).json({ error: 'Asignación no encontrada' });
+    }
+
+    res.status(200).json({ message: 'Usuario removido exitosamente del proyecto' });
+  } catch (error) {
+    console.error('Error al remover usuario:', error);
+    res.status(500).json({ error: 'Error al remover usuario del proyecto' });
+  }
+};
 
 const createProject = async (req, res) => {
   try {
     const project = await Project.create(req.body);
     
-    // Asignar automáticamente al creador del proyecto
     await ProjectUser.create({
       project_id: project.id,
       user_id: req.user.id,
@@ -58,7 +92,6 @@ const getProjects = async (req, res) => {
     let projects;
     
     if (req.user.role === 'admin') {
-      // Administradores ven todos los proyectos
       projects = await Project.findAll({
         include: [{
           model: User,
@@ -66,7 +99,6 @@ const getProjects = async (req, res) => {
         }]
       });
     } else {
-      // Usuarios normales solo ven sus proyectos asignados
       projects = await Project.findAll({
         include: [{
           model: User,
@@ -88,19 +120,16 @@ const assignUserToProject = async (req, res) => {
     const { projectId } = req.params;
     const { userId } = req.body;
 
-    // Verificar si el usuario existe
     const user = await User.findByPk(userId);
     if (!user) {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }
 
-    // Verificar si el proyecto existe
     const project = await Project.findByPk(projectId);
     if (!project) {
       return res.status(404).json({ error: 'Proyecto no encontrado' });
     }
 
-    // Verificar si ya está asignado
     const existingAssignment = await ProjectUser.findOne({
       where: {
         project_id: projectId,
@@ -112,7 +141,6 @@ const assignUserToProject = async (req, res) => {
       return res.status(400).json({ error: 'Usuario ya asignado a este proyecto' });
     }
 
-    // Crear la asignación
     await ProjectUser.create({
       project_id: projectId,
       user_id: userId,
@@ -125,26 +153,6 @@ const assignUserToProject = async (req, res) => {
   }
 };
 
-const removeUserFromProject = async (req, res) => {
-  try {
-    const { projectId, userId } = req.params;
-
-    const deleted = await ProjectUser.destroy({
-      where: {
-        project_id: projectId,
-        user_id: userId
-      }
-    });
-
-    if (!deleted) {
-      return res.status(404).json({ error: 'Asignación no encontrada' });
-    }
-
-    res.status(200).json({ message: 'Usuario removido exitosamente del proyecto' });
-  } catch (error) {
-    res.status(500).json({ error: 'Error al remover usuario del proyecto' });
-  }
-};
 const updateProject = async (req, res) => {
   try {
     const { id } = req.params;
@@ -163,8 +171,6 @@ const updateProject = async (req, res) => {
     res.status(500).json({ error: 'Error al actualizar el proyecto' });
   }
 };
-
-
 
 const getProjectUsers = async (req, res) => {
   try {
@@ -212,27 +218,61 @@ const deleteProject = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const deleted = await Project.destroy({ where: { id } });
+    console.log(`🔍 Intentando eliminar el proyecto con ID: ${id}`);
 
-    if (!deleted) {
+    // Verificar si hay tareas pendientes o en progreso
+    const incompleteTasks = await Task.findOne({
+      where: {
+        project_id: id,
+        status: {
+          [Op.notIn]: ['Completada']
+        }
+      }
+    });
+
+    if (incompleteTasks) {
+      return res.status(400).json({
+        error: "❌ No se puede eliminar el proyecto porque tiene tareas pendientes o en progreso"
+      });
+    }
+
+    console.log("✅ Todas las tareas están completadas, procediendo a eliminar...");
+
+    // ELIMINAR TODAS LAS TAREAS DEL PROYECTO
+    const deletedTasks = await Task.destroy({ where: { project_id: id } });
+    console.log(`📌 ${deletedTasks} tareas eliminadas del proyecto.`);
+
+    // Eliminar relaciones en la tabla intermedia
+    const deletedProjectUsers = await ProjectUser.destroy({ where: { project_id: id } });
+    console.log(`👥 ${deletedProjectUsers} relaciones usuario-proyecto eliminadas.`);
+
+    // Ahora eliminar el proyecto
+    const deletedProject = await Project.destroy({ where: { id } });
+
+    if (!deletedProject) {
+      console.log("❌ Proyecto no encontrado.");
       return res.status(404).json({ error: "Proyecto no encontrado" });
     }
 
-    res.status(200).json({ message: "Proyecto eliminado correctamente" });
+    console.log("✅ Proyecto eliminado correctamente.");
+    res.status(200).json({ message: "✅ Proyecto eliminado correctamente" });
+
   } catch (error) {
-    console.error("❌ Error al eliminar el proyecto:", error);
-    res.status(500).json({ error: "Error al eliminar el proyecto" });
+    console.error("🔥 Error en deleteProject:", error.message, error.stack);
+    res.status(500).json({ error: error.message });
   }
 };
+
+
+
 module.exports = { 
   createProject, 
   getProjects, 
   assignUserToProject, 
   removeUserFromProject, 
-  getProjectUsers ,
-  getProjectById ,
-  updateProject ,
-  deleteProject  ,
   getProjectUsers,
+  getProjectById,
+  updateProject,
+  deleteProject,
   getUnassignedUsers
 };

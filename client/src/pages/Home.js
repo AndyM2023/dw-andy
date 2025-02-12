@@ -145,7 +145,7 @@ const Home = () => {
           
           {userRole === 'admin' && (
             <button
-              className="px-5 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition shadow-md"
+              className="px-5 py-2 bg-green-700 text-white rounded-lg hover:bg-green-600 transition shadow-md"
               onClick={handleAddProject}
             >
               ➕ Nuevo Proyecto

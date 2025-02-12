@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { getTasksByProject } from "../../api/taskService"; // ✅ Importa la función correcta
+import { getTasksByProject } from "../../api/taskService"; 
 import GanttChart from "../GanttChart";
 import BurndownChart from "../BurndownChart";
 
