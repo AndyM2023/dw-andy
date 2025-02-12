@@ -64,10 +64,10 @@ const GanttChart = ({ tasks }) => {
 
     // Colores según estado (Incluye "Atrasada")
     const colorMap = {
-      "Completada": "#4CAF50",
-      "Pendiente": "#FFC107",
+      Completada: "#4CAF50",
+      Pendiente: "#FFC107",
       "En Progreso": "#2196F3",
-      "Atrasada": "#F44336",
+      Atrasada: "#F44336",
     };
 
     // Agregar barras de tareas
@@ -78,20 +78,21 @@ const GanttChart = ({ tasks }) => {
       .append("rect")
       .attr("x", (d) => xScale(parseDate(d.start_date)))
       .attr("y", (d) => yScale(d.title))
-      .attr("width", (d) => xScale(parseDate(d.due_date)) - xScale(parseDate(d.start_date)))
+      .attr(
+        "width",
+        (d) => xScale(parseDate(d.due_date)) - xScale(parseDate(d.start_date)),
+      )
       .attr("height", yScale.bandwidth())
       .attr("fill", (d) => colorMap[d.status] || "#ccc")
       .attr("rx", 5)
       .attr("ry", 5)
       .on("mouseover", (event, d) => {
-        tooltip
-          .style("visibility", "visible")
-          .html(
-            `<strong>${d.title}</strong><br>
+        tooltip.style("visibility", "visible").html(
+          `<strong>${d.title}</strong><br>
             📅 Inicio: ${new Date(d.start_date).toLocaleDateString()}<br>
             🏁 Fin: ${new Date(d.due_date).toLocaleDateString()}<br>
-            🔹 Estado: ${d.status === "Atrasada" ? "❌ Atrasada" : d.status}`
-          );
+            🔹 Estado: ${d.status === "Atrasada" ? "❌ Atrasada" : d.status}`,
+        );
       })
       .on("mousemove", (event) => {
         tooltip
@@ -110,12 +111,10 @@ const GanttChart = ({ tasks }) => {
       .style("padding", "8px")
       .style("border-radius", "5px")
       .style("visibility", "hidden");
-
   }, [tasks]);
 
   return (
     <div className="bg-gray-900 p-6 rounded-lg shadow-md text-center">
-
       <svg ref={svgRef}></svg>
     </div>
   );

@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import Swal from 'sweetalert2';
+import React, { useState, useEffect } from "react";
+import Swal from "sweetalert2";
 
 function UserAssignmentForm({ projectId, onClose, onAssign }) {
   const [users, setUsers] = useState([]);
-  const [selectedUser, setSelectedUser] = useState('');
+  const [selectedUser, setSelectedUser] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -12,24 +12,27 @@ function UserAssignmentForm({ projectId, onClose, onAssign }) {
 
   const fetchUnassignedUsers = async () => {
     try {
-      const token = localStorage.getItem('authToken');
-      const response = await fetch(`http://localhost:3001/api/projects/${projectId}/unassigned-users`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const token = localStorage.getItem("authToken");
+      const response = await fetch(
+        `http://localhost:3001/api/projects/${projectId}/unassigned-users`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
       if (!response.ok) {
-        throw new Error('Error al obtener usuarios');
+        throw new Error("Error al obtener usuarios");
       }
       const data = await response.json();
       setUsers(data);
       setLoading(false);
     } catch (error) {
-      console.error('Error al obtener usuarios:', error);
+      console.error("Error al obtener usuarios:", error);
       Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'No se pudieron cargar los usuarios'
+        icon: "error",
+        title: "Error",
+        text: "No se pudieron cargar los usuarios",
       });
       setLoading(false);
     }
@@ -39,39 +42,42 @@ function UserAssignmentForm({ projectId, onClose, onAssign }) {
     e.preventDefault();
     if (!selectedUser) {
       Swal.fire({
-        icon: 'warning',
-        title: 'Seleccione un usuario',
-        text: 'Debe seleccionar un usuario para asignarlo al proyecto'
+        icon: "warning",
+        title: "Seleccione un usuario",
+        text: "Debe seleccionar un usuario para asignarlo al proyecto",
       });
       return;
     }
 
     try {
-      const token = localStorage.getItem('authToken');
-      const response = await fetch(`http://localhost:3001/api/projects/${projectId}/users`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+      const token = localStorage.getItem("authToken");
+      const response = await fetch(
+        `http://localhost:3001/api/projects/${projectId}/users`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ userId: selectedUser }),
         },
-        body: JSON.stringify({ userId: selectedUser })
-      });
+      );
 
       if (response.ok) {
         Swal.fire({
-          icon: 'success',
-          title: 'Usuario asignado',
-          text: 'El usuario ha sido asignado exitosamente al proyecto'
+          icon: "success",
+          title: "Usuario asignado",
+          text: "El usuario ha sido asignado exitosamente al proyecto",
         });
         onAssign();
       } else {
-        throw new Error('Error al asignar usuario');
+        throw new Error("Error al asignar usuario");
       }
     } catch (error) {
       Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Error al asignar el usuario al proyecto'
+        icon: "error",
+        title: "Error",
+        text: "Error al asignar el usuario al proyecto",
       });
     }
   };
@@ -83,7 +89,9 @@ function UserAssignmentForm({ projectId, onClose, onAssign }) {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-md">
-        <h2 className="text-xl font-bold mb-4 text-white">Asignar Usuario al Proyecto</h2>
+        <h2 className="text-xl font-bold mb-4 text-white">
+          Asignar Usuario al Proyecto
+        </h2>
         {users.length === 0 ? (
           <p className="text-white">No hay usuarios disponibles para asignar</p>
         ) : (
@@ -99,7 +107,7 @@ function UserAssignmentForm({ projectId, onClose, onAssign }) {
                 required
               >
                 <option value="">Seleccione un usuario</option>
-                {users.map(user => (
+                {users.map((user) => (
                   <option key={user.id} value={user.id}>
                     {user.username}
                   </option>

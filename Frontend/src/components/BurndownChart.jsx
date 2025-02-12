@@ -27,13 +27,20 @@ function BurndownChart({ tasks, startDate, endDate }) {
 
     const totalTasks = tasks.length;
 
-    const xScale = d3.scaleTime().domain([projectStart, projectEnd]).range([0, width]);
+    const xScale = d3
+      .scaleTime()
+      .domain([projectStart, projectEnd])
+      .range([0, width]);
     const yScale = d3.scaleLinear().domain([0, totalTasks]).range([height, 0]);
 
-    const xAxis = d3.axisBottom(xScale).ticks(8).tickFormat(d3.timeFormat("%b %d"));
+    const xAxis = d3
+      .axisBottom(xScale)
+      .ticks(8)
+      .tickFormat(d3.timeFormat("%b %d"));
     const yAxis = d3.axisLeft(yScale);
 
-    svg.append("g")
+    svg
+      .append("g")
       .attr("transform", `translate(0,${height})`)
       .call(xAxis)
       .selectAll("text")
@@ -41,7 +48,8 @@ function BurndownChart({ tasks, startDate, endDate }) {
 
     svg.append("g").call(yAxis).selectAll("text").style("fill", "#ccc");
 
-    svg.append("text")
+    svg
+      .append("text")
       .attr("x", width / 2)
       .attr("y", height + 40)
       .attr("fill", "#ccc")
@@ -49,7 +57,8 @@ function BurndownChart({ tasks, startDate, endDate }) {
       .style("font-size", "14px")
       .text("📆 Días del Proyecto");
 
-    svg.append("text")
+    svg
+      .append("text")
       .attr("x", -height / 2)
       .attr("y", -50)
       .attr("fill", "#ccc")
@@ -63,12 +72,14 @@ function BurndownChart({ tasks, startDate, endDate }) {
       { date: projectEnd, tasksLeft: 0 },
     ];
 
-    const lineGenerator = d3.line()
-      .x(d => xScale(d.date))
-      .y(d => yScale(d.tasksLeft))
+    const lineGenerator = d3
+      .line()
+      .x((d) => xScale(d.date))
+      .y((d) => yScale(d.tasksLeft))
       .curve(d3.curveMonotoneX);
 
-    svg.append("path")
+    svg
+      .append("path")
       .datum(idealBurndown)
       .attr("fill", "none")
       .attr("stroke", "#00bcd4")
@@ -80,23 +91,24 @@ function BurndownChart({ tasks, startDate, endDate }) {
     let remainingTasks = totalTasks;
 
     const sortedTasks = tasks
-      .map(task => ({
+      .map((task) => ({
         ...task,
-        date: task.status === "Completada" ? 
-          new Date(task.updatedAt) : 
-          parseDate(task.due_date),   
-        isCompleted: task.status === "Completada"
+        date:
+          task.status === "Completada"
+            ? new Date(task.updatedAt)
+            : parseDate(task.due_date),
+        isCompleted: task.status === "Completada",
       }))
       .sort((a, b) => a.date - b.date);
 
-    sortedTasks.forEach(task => {
+    sortedTasks.forEach((task) => {
       if (task.isCompleted) {
         remainingTasks -= 1;
       }
       actualBurndown.push({
         date: task.date,
         tasksLeft: remainingTasks,
-        task: task
+        task: task,
       });
     });
 
@@ -105,12 +117,13 @@ function BurndownChart({ tasks, startDate, endDate }) {
       if (today > lastPoint.date) {
         actualBurndown.push({
           date: today,
-          tasksLeft: remainingTasks
+          tasksLeft: remainingTasks,
         });
       }
     }
 
-    const pathActual = svg.append("path")
+    const pathActual = svg
+      .append("path")
       .datum(actualBurndown)
       .attr("fill", "none")
       .attr("stroke", "#00ff88")
@@ -126,14 +139,15 @@ function BurndownChart({ tasks, startDate, endDate }) {
       .ease(d3.easeLinear)
       .attr("stroke-dashoffset", 0);
 
-    svg.selectAll("circle")
+    svg
+      .selectAll("circle")
       .data(actualBurndown)
       .enter()
       .append("circle")
-      .attr("cx", d => xScale(d.date))
-      .attr("cy", d => yScale(d.tasksLeft))
+      .attr("cx", (d) => xScale(d.date))
+      .attr("cy", (d) => yScale(d.tasksLeft))
       .attr("r", 5)
-      .attr("fill", d => {
+      .attr("fill", (d) => {
         if (!d.task) return "#ccc";
         if (d.task.status === "Completada") return "#10B981";
         if (d.date < today) return "#EF4444";
@@ -141,7 +155,8 @@ function BurndownChart({ tasks, startDate, endDate }) {
       })
       .attr("stroke", "white");
 
-    const tooltip = d3.select("body")
+    const tooltip = d3
+      .select("body")
       .append("div")
       .style("position", "absolute")
       .style("background", "rgba(0,0,0,0.8)")
@@ -150,18 +165,23 @@ function BurndownChart({ tasks, startDate, endDate }) {
       .style("border-radius", "5px")
       .style("visibility", "hidden");
 
-    svg.selectAll("circle")
+    svg
+      .selectAll("circle")
       .on("mouseover", (event, d) => {
         let tooltipContent = `
           📅 ${d3.timeFormat("%b %d")(d.date)}<br>
           📌 ${d.tasksLeft} tareas restantes<br>
         `;
-        
+
         if (d.task) {
-          let estado = d.task.status === "Completada" ? "✅ Completada" :
-                      d.date < today ? "❌ Atrasada" : "⏳ En progreso";
+          let estado =
+            d.task.status === "Completada"
+              ? "✅ Completada"
+              : d.date < today
+                ? "❌ Atrasada"
+                : "⏳ En progreso";
           tooltipContent += `⚠️ Estado: <strong>${estado}</strong><br>`;
-          
+
           if (d.task.status === "Completada" && d.task.updatedAt) {
             const completionDate = new Date(d.task.updatedAt);
             tooltipContent += `🗓️ Completada el: ${d3.timeFormat("%b %d, %Y")(completionDate)}<br>`;
@@ -171,12 +191,10 @@ function BurndownChart({ tasks, startDate, endDate }) {
           tooltipContent += `📝 Tarea: <strong>${d.task.title}</strong><br>`;
           tooltipContent += `🔺 Prioridad: <strong>${d.task.priority}</strong>`;
         }
-        
-        tooltip
-          .style("visibility", "visible")
-          .html(tooltipContent);
+
+        tooltip.style("visibility", "visible").html(tooltipContent);
       })
-      .on("mousemove", event => {
+      .on("mousemove", (event) => {
         tooltip
           .style("top", `${event.pageY - 20}px`)
           .style("left", `${event.pageX + 10}px`);
@@ -198,6 +216,3 @@ function BurndownChart({ tasks, startDate, endDate }) {
 }
 
 export default BurndownChart;
-
-
-

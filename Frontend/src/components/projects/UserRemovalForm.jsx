@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import Swal from 'sweetalert2';
+import React, { useState, useEffect } from "react";
+import Swal from "sweetalert2";
 
 function UserRemovalForm({ projectId, onClose, onRemove }) {
   const [users, setUsers] = useState([]);
-  const [selectedUser, setSelectedUser] = useState('');
+  const [selectedUser, setSelectedUser] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -12,24 +12,27 @@ function UserRemovalForm({ projectId, onClose, onRemove }) {
 
   const fetchProjectUsers = async () => {
     try {
-      const token = localStorage.getItem('authToken');
-      const response = await fetch(`http://localhost:3001/api/projects/${projectId}/users`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const token = localStorage.getItem("authToken");
+      const response = await fetch(
+        `http://localhost:3001/api/projects/${projectId}/users`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
       if (!response.ok) {
-        throw new Error('Error al obtener usuarios');
+        throw new Error("Error al obtener usuarios");
       }
       const data = await response.json();
       setUsers(data);
       setLoading(false);
     } catch (error) {
-      console.error('Error al obtener usuarios:', error);
+      console.error("Error al obtener usuarios:", error);
       Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'No se pudieron cargar los usuarios'
+        icon: "error",
+        title: "Error",
+        text: "No se pudieron cargar los usuarios",
       });
       setLoading(false);
     }
@@ -39,43 +42,47 @@ function UserRemovalForm({ projectId, onClose, onRemove }) {
     e.preventDefault();
     if (!selectedUser) {
       Swal.fire({
-        icon: 'warning',
-        title: 'Seleccione un usuario',
-        text: 'Debe seleccionar un usuario para removerlo del proyecto'
+        icon: "warning",
+        title: "Seleccione un usuario",
+        text: "Debe seleccionar un usuario para removerlo del proyecto",
       });
       return;
     }
 
     try {
-      const token = localStorage.getItem('authToken');
-      const response = await fetch(`http://localhost:3001/api/projects/${projectId}/users/${selectedUser}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const token = localStorage.getItem("authToken");
+      const response = await fetch(
+        `http://localhost:3001/api/projects/${projectId}/users/${selectedUser}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
 
       const data = await response.json();
 
       if (response.ok) {
         Swal.fire({
-          icon: 'success',
-          title: 'Usuario removido',
-          text: 'El usuario ha sido removido exitosamente del proyecto'
+          icon: "success",
+          title: "Usuario removido",
+          text: "El usuario ha sido removido exitosamente del proyecto",
         });
         onRemove();
       } else {
         Swal.fire({
-          icon: 'error',
-          title: 'No se puede remover el usuario',
-          text: data.error || 'El usuario tiene tareas pendientes o en progreso'
+          icon: "error",
+          title: "No se puede remover el usuario",
+          text:
+            data.error || "El usuario tiene tareas pendientes o en progreso",
         });
       }
     } catch (error) {
       Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Error al remover el usuario del proyecto'
+        icon: "error",
+        title: "Error",
+        text: "Error al remover el usuario del proyecto",
       });
     }
   };
@@ -87,7 +94,9 @@ function UserRemovalForm({ projectId, onClose, onRemove }) {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-md">
-        <h2 className="text-xl font-bold mb-4 text-white">Remover Usuario del Proyecto</h2>
+        <h2 className="text-xl font-bold mb-4 text-white">
+          Remover Usuario del Proyecto
+        </h2>
         {users.length === 0 ? (
           <p className="text-white">No hay usuarios asignados al proyecto</p>
         ) : (
@@ -103,14 +112,15 @@ function UserRemovalForm({ projectId, onClose, onRemove }) {
                 required
               >
                 <option value="">Seleccione un usuario</option>
-                {users.map(user => (
+                {users.map((user) => (
                   <option key={user.id} value={user.id}>
                     {user.username}
                   </option>
                 ))}
               </select>
               <p className="mt-2 text-sm text-gray-400">
-                Nota: Solo se pueden remover usuarios que no tengan tareas pendientes o en progreso
+                Nota: Solo se pueden remover usuarios que no tengan tareas
+                pendientes o en progreso
               </p>
             </div>
 

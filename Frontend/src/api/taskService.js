@@ -3,7 +3,9 @@ const API_URL = "http://localhost:3001/api/tasks";
 export const getTasksByProject = async (projectId) => {
   try {
     console.log(`🔎 Buscando tareas para el proyecto ${projectId}`);
-    const response = await fetch(`http://localhost:3001/api/tasks/project/${projectId}`);
+    const response = await fetch(
+      `http://localhost:3001/api/tasks/project/${projectId}`,
+    );
     if (!response.ok) {
       throw new Error(`Error al obtener tareas: ${response.status}`);
     }

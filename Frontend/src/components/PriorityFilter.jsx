@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 function PriorityFilter({ selectedPriority, onChange }) {
   const handlePriorityChange = (event) => {
@@ -7,7 +7,9 @@ function PriorityFilter({ selectedPriority, onChange }) {
 
   return (
     <div className="mb-4">
-      <label htmlFor="priority-filter" className="mr-2 text-white text-2xl">Prioridad:</label>
+      <label htmlFor="priority-filter" className="mr-2 text-white text-2xl">
+        Prioridad:
+      </label>
       <select
         id="priority-filter"
         value={selectedPriority}

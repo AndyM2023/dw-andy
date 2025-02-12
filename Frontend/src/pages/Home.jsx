@@ -1,4 +1,3 @@
-
 import React, { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
 //import { getProjects, createProject, updateProject, deleteProject } from "../api/projectService";
@@ -24,15 +23,13 @@ const Home = () => {
     window.scrollTo(0, 0);
   }, [isAuthenticated]);
 
-
-
   const fetchUsername = async () => {
     try {
-      const token = localStorage.getItem('authToken');
-      const response = await fetch('http://localhost:3001/api/auth/me', {
+      const token = localStorage.getItem("authToken");
+      const response = await fetch("http://localhost:3001/api/auth/me", {
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
       const data = await response.json();
       setUsername(data.username);
@@ -41,16 +38,14 @@ const Home = () => {
     }
   };
 
-
-  
   const fetchProjects = async () => {
     if (!userId) return;
     try {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem("authToken");
       const response = await fetch(`http://localhost:3001/api/projects`, {
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
       const data = await response.json();
       setProjects(Array.isArray(data) ? data : []);
@@ -60,8 +55,8 @@ const Home = () => {
   };
 
   const handleAddProject = () => {
-    if (userRole !== 'admin') {
-      alert('Solo los administradores pueden crear proyectos');
+    if (userRole !== "admin") {
+      alert("Solo los administradores pueden crear proyectos");
       return;
     }
     setEditingProject(null);
@@ -70,24 +65,24 @@ const Home = () => {
 
   const handleSaveProject = async (projectData) => {
     try {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem("authToken");
       if (editingProject) {
         await fetch(`http://localhost:3001/api/projects/${editingProject.id}`, {
-          method: 'PUT',
+          method: "PUT",
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify(projectData)
+          body: JSON.stringify(projectData),
         });
       } else {
-        await fetch('http://localhost:3001/api/projects', {
-          method: 'POST',
+        await fetch("http://localhost:3001/api/projects", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify(projectData)
+          body: JSON.stringify(projectData),
         });
       }
       fetchProjects();
@@ -98,8 +93,8 @@ const Home = () => {
   };
 
   const handleEditProject = (project) => {
-    if (userRole !== 'admin') {
-      alert('Solo los administradores pueden editar proyectos');
+    if (userRole !== "admin") {
+      alert("Solo los administradores pueden editar proyectos");
       return;
     }
     setEditingProject(project);
@@ -107,17 +102,17 @@ const Home = () => {
   };
 
   const handleDeleteProject = async (id) => {
-    if (userRole !== 'admin') {
-      alert('Solo los administradores pueden eliminar proyectos');
+    if (userRole !== "admin") {
+      alert("Solo los administradores pueden eliminar proyectos");
       return;
     }
     try {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem("authToken");
       await fetch(`http://localhost:3001/api/projects/${id}`, {
-        method: 'DELETE',
+        method: "DELETE",
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
       fetchProjects();
     } catch (err) {
@@ -129,21 +124,25 @@ const Home = () => {
     <div className="bg-gradient-to-br from-gray-900 via-gray-700 to-gray-900 min-h-screen text-white">
       <div className="max-w-7xl mx-auto p-4">
         <div className="text-center my-8">
-          <h1 className="text-4xl font-bold mb-3 
+          <h1
+            className="text-4xl font-bold mb-3 
             bg-gradient-to-r from-gray-400 via-red-500 to-blue-600
-            bg-clip-text text-transparent animate-gradient">
+            bg-clip-text text-transparent animate-gradient"
+          >
             ¡ Hola {username}, bienvenido a Gestion-Proyect !
           </h1>
 
           <p className="text-lg text-gray-300">
-            {userRole === 'admin' ? 'Gestiona y asigna proyectos' : 'Visualiza tus proyectos asignados'}
+            {userRole === "admin"
+              ? "Gestiona y asigna proyectos"
+              : "Visualiza tus proyectos asignados"}
           </p>
         </div>
 
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Mis Proyectos</h1>
-          
-          {userRole === 'admin' && (
+
+          {userRole === "admin" && (
             <button
               className="px-5 py-2 bg-green-700 text-white rounded-lg hover:bg-green-600 transition shadow-md"
               onClick={handleAddProject}

@@ -1,28 +1,27 @@
-import React, { useState } from 'react';
-import Swal from 'sweetalert2';
+import React, { useState } from "react";
+import Swal from "sweetalert2";
 
 const Login = ({ onLogin }) => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!username || !password) {
       Swal.fire({
-        icon: 'warning',
-        title: 'Campos vacíos',
-        text: 'Por favor, ingresa tu usuario y contraseña',
+        icon: "warning",
+        title: "Campos vacíos",
+        text: "Por favor, ingresa tu usuario y contraseña",
       });
       return;
     }
 
     try {
-      const response = await fetch('http://localhost:3001/api/auth/login', {
-        method: 'POST',
+      const response = await fetch("http://localhost:3001/api/auth/login", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ username, password }),
       });
@@ -31,9 +30,9 @@ const Login = ({ onLogin }) => {
 
       if (response.ok && data.userId) {
         Swal.fire({
-          icon: 'success',
-          title: '¡Bienvenido!',
-          text: 'Has iniciado sesión correctamente',
+          icon: "success",
+          title: "¡Bienvenido!",
+          text: "Has iniciado sesión correctamente",
           timer: 2000,
           showConfirmButton: false,
         });
@@ -42,16 +41,16 @@ const Login = ({ onLogin }) => {
         onLogin(data.token, data.role, data.userId);
       } else {
         Swal.fire({
-          icon: 'error',
-          title: 'Error al iniciar sesión',
-          text: data.error || 'Usuario o contraseña incorrectos',
+          icon: "error",
+          title: "Error al iniciar sesión",
+          text: data.error || "Usuario o contraseña incorrectos",
         });
       }
     } catch (err) {
       Swal.fire({
-        icon: 'error',
-        title: 'Error de conexión',
-        text: 'No se pudo conectar con el servidor',
+        icon: "error",
+        title: "Error de conexión",
+        text: "No se pudo conectar con el servidor",
       });
     }
   };
@@ -73,7 +72,9 @@ const Login = ({ onLogin }) => {
         />
       </div>
       <div className="mb-4">
-        <label htmlFor="password" className="block text-white">Contraseña</label>
+        <label htmlFor="password" className="block text-white">
+          Contraseña
+        </label>
         <input
           type="password"
           id="password"

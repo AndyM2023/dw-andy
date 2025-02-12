@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { getTasksByProject } from "../../api/taskService"; 
+import { getTasksByProject } from "../../api/taskService";
 import GanttChart from "../GanttChart";
 import BurndownChart from "../BurndownChart";
 
@@ -37,7 +37,11 @@ function ProjectDetails({ projects }) {
 
       <div className="mt-6">
         <h3 className="text-xl font-semibold">📊 Gráfico de Burndown</h3>
-        <BurndownChart tasks={tasks} startDate={project.start_date} endDate={project.end_date} />
+        <BurndownChart
+          tasks={tasks}
+          startDate={project.start_date}
+          endDate={project.end_date}
+        />
       </div>
 
       <div className="mt-6">

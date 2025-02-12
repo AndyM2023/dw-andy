@@ -13,7 +13,7 @@ export const AuthProvider = ({ children }) => {
     const token = localStorage.getItem("authToken");
     const role = localStorage.getItem("userRole");
     const id = localStorage.getItem("user_id");
-    
+
     if (token) {
       setIsAuthenticated(true);
       setUserRole(role);
@@ -50,13 +50,15 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ 
-      isAuthenticated, 
-      login, 
-      logout, 
-      userRole,
-      userId 
-    }}>
+    <AuthContext.Provider
+      value={{
+        isAuthenticated,
+        login,
+        logout,
+        userRole,
+        userId,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

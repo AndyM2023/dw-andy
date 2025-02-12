@@ -1,29 +1,33 @@
-import React, { useState } from 'react';
-import Swal from 'sweetalert2';
+import React, { useState } from "react";
+import Swal from "sweetalert2";
 
 function ProjectForm({ project, onSave, onCancel }) {
-  const [name, setName] = useState(project?.name || '');
-  const [description, setDescription] = useState(project?.description || '');
-  const [startDate, setStartDate] = useState(project?.start_date ? project.start_date.split("T")[0] : "");
-  const [endDate, setEndDate] = useState(project?.end_date ? project.end_date.split("T")[0] : "");
+  const [name, setName] = useState(project?.name || "");
+  const [description, setDescription] = useState(project?.description || "");
+  const [startDate, setStartDate] = useState(
+    project?.start_date ? project.start_date.split("T")[0] : "",
+  );
+  const [endDate, setEndDate] = useState(
+    project?.end_date ? project.end_date.split("T")[0] : "",
+  );
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!name.trim() || !description.trim() || !startDate || !endDate) {
       Swal.fire({
-        icon: 'warning',
-        title: 'Campos incompletos',
-        text: 'Todos los campos son obligatorios'
+        icon: "warning",
+        title: "Campos incompletos",
+        text: "Todos los campos son obligatorios",
       });
       return;
     }
 
     if (new Date(startDate) >= new Date(endDate)) {
       Swal.fire({
-        icon: 'warning',
-        title: 'Fechas inválidas',
-        text: 'La fecha de inicio debe ser anterior a la fecha de finalización'
+        icon: "warning",
+        title: "Fechas inválidas",
+        text: "La fecha de inicio debe ser anterior a la fecha de finalización",
       });
       return;
     }
@@ -32,22 +36,22 @@ function ProjectForm({ project, onSave, onCancel }) {
       name,
       description,
       start_date: startDate,
-      end_date: endDate
+      end_date: endDate,
     };
 
     try {
       await onSave(projectData);
       Swal.fire({
-        icon: 'success',
-        title: 'Éxito',
-        text: `Proyecto ${project ? 'actualizado' : 'creado'} correctamente`
+        icon: "success",
+        title: "Éxito",
+        text: `Proyecto ${project ? "actualizado" : "creado"} correctamente`,
       });
     } catch (error) {
-      console.error('Error al guardar el proyecto:', error);
+      console.error("Error al guardar el proyecto:", error);
       Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'No se pudo guardar el proyecto'
+        icon: "error",
+        title: "Error",
+        text: "No se pudo guardar el proyecto",
       });
     }
   };
@@ -55,7 +59,7 @@ function ProjectForm({ project, onSave, onCancel }) {
   return (
     <div className="bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-md">
       <h2 className="text-xl font-bold mb-4 text-white">
-        {project ? 'Editar Proyecto' : 'Nuevo Proyecto'}
+        {project ? "Editar Proyecto" : "Nuevo Proyecto"}
       </h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>

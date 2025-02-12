@@ -1,16 +1,16 @@
-import React from 'react';
+import React from "react";
 
 function TaskList({ tasks, onEdit, onDelete, onStatusChange }) {
   const statusColors = {
-    Pendiente: 'bg-yellow-500',
-    'En Progreso': 'bg-blue-500',
-    Completada: 'bg-green-500'
+    Pendiente: "bg-yellow-500",
+    "En Progreso": "bg-blue-500",
+    Completada: "bg-green-500",
   };
 
   const priorityColors = {
-    Alta: 'text-red-400',
-    Media: 'text-yellow-400',
-    Baja: 'text-green-400'
+    Alta: "text-red-400",
+    Media: "text-yellow-400",
+    Baja: "text-green-400",
   };
 
   return (
@@ -25,7 +25,9 @@ function TaskList({ tasks, onEdit, onDelete, onStatusChange }) {
           >
             <div className="flex items-center justify-between mb-2">
               <h4 className="text-lg font-semibold">{task.title}</h4>
-              <span className={`px-2 py-1 rounded text-sm ${statusColors[task.status]}`}>
+              <span
+                className={`px-2 py-1 rounded text-sm ${statusColors[task.status]}`}
+              >
                 {task.status}
               </span>
             </div>
@@ -41,7 +43,9 @@ function TaskList({ tasks, onEdit, onDelete, onStatusChange }) {
               </div>
               <div>
                 <span className="text-gray-400">📌 Prioridad: </span>
-                <span className={priorityColors[task.priority]}>{task.priority}</span>
+                <span className={priorityColors[task.priority]}>
+                  {task.priority}
+                </span>
               </div>
             </div>
             <div className="flex space-x-2">
