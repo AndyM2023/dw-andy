@@ -124,11 +124,11 @@ const Home = () => {
       <div className="max-w-7xl mx-auto p-4">
         <div className="text-center my-8">
           <h1
-            className="text-4xl font-bold mb-3 
+            className="text-4xl font-bold mb-5 
             bg-gradient-to-r from-gray-400 via-red-500 to-blue-600
             bg-clip-text text-transparent animate-gradient"
           >
-            ¡ Hola {username}, bienvenido a Gestion-Proyect !
+            ¡ Hola {username}, bienvenido a DW-Project Management
           </h1>
 
           <p className="text-lg text-gray-300">

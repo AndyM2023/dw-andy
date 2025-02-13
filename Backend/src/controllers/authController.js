@@ -14,7 +14,7 @@ const register = async (req, res) => {
         .json({ error: "Nombre de usuario y contraseña requeridos" });
     }
 
-    // Verificar si el usuario ya existe
+
     const existingUser = await User.findOne({ where: { username } });
     if (existingUser) {
       return res
@@ -22,17 +22,17 @@ const register = async (req, res) => {
         .json({ error: "El nombre de usuario ya está en uso" });
     }
 
-    // Hashear la contraseña
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Crear usuario (por defecto como 'user' si no se especifica rol)
+
     const newUser = await User.create({
       username,
       password: hashedPassword,
       role: role || "user",
     });
 
-    // Generar token
+
     const token = jwt.sign({ userId: newUser.id }, JWT_SECRET, {
       expiresIn: "1h",
     });
@@ -59,7 +59,7 @@ const login = async (req, res) => {
         .json({ error: "Nombre de usuario y contraseña requeridos" });
     }
 
-    // Buscar usuario
+
     const user = await User.findOne({ where: { username } });
 
     if (!user) {
@@ -68,7 +68,7 @@ const login = async (req, res) => {
         .json({ error: "Nombre de usuario o contraseña incorrectos" });
     }
 
-    // Comparar contraseñas
+
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res
@@ -76,7 +76,7 @@ const login = async (req, res) => {
         .json({ error: "Nombre de usuario o contraseña incorrectos" });
     }
 
-    // Generar token
+
     const token = jwt.sign({ userId: user.id }, JWT_SECRET, {
       expiresIn: "1h",
     });
