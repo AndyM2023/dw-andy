@@ -87,8 +87,10 @@ const GanttChart = ({ tasks }) => {
       .attr("rx", 5)
       .attr("ry", 5)
       .on("mouseover", (event, d) => {
+        console.log("Tarea en tooltip:", d); 
         tooltip.style("visibility", "visible").html(
           `<strong>${d.title}</strong><br>
+          👤 <strong>Asignado a: ${d.assigned_username || "Sin asignar"}</strong><br>
             📅 Inicio: ${new Date(d.start_date).toLocaleDateString()}<br>
             🏁 Fin: ${new Date(d.due_date).toLocaleDateString()}<br>
             🔹 Estado: ${d.status === "Atrasada" ? "❌ Atrasada" : d.status}`,

@@ -11,6 +11,7 @@ function ProjectForm({ project, onSave, onCancel }) {
     project?.end_date ? project.end_date.split("T")[0] : "",
   );
 
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
 

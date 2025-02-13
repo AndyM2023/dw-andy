@@ -91,16 +91,22 @@ function BurndownChart({ tasks, startDate, endDate }) {
     let remainingTasks = totalTasks;
 
     const sortedTasks = tasks
-      .map((task) => ({
+    .map((task) => {
+      let completionDate = task.status === "Completada"
+        ? new Date(task.updatedAt)
+        : parseDate(task.due_date);
+  
+      if (completionDate > projectEnd) {
+        completionDate = projectEnd; // Limitar la fecha de completado al final del proyecto
+      }
+  
+      return {
         ...task,
-        date:
-          task.status === "Completada"
-            ? new Date(task.updatedAt)
-            : parseDate(task.due_date),
+        date: completionDate,
         isCompleted: task.status === "Completada",
-      }))
-      .sort((a, b) => a.date - b.date);
-
+      };
+    })
+    .sort((a, b) => a.date - b.date);
     sortedTasks.forEach((task) => {
       if (task.isCompleted) {
         remainingTasks -= 1;
@@ -139,19 +145,19 @@ function BurndownChart({ tasks, startDate, endDate }) {
       .ease(d3.easeLinear)
       .attr("stroke-dashoffset", 0);
 
-    svg
+      svg
       .selectAll("circle")
       .data(actualBurndown)
       .enter()
       .append("circle")
-      .attr("cx", (d) => xScale(d.date))
+      .attr("cx", (d, i) => xScale(d.date) + (i % 2 === 0 ? -5 : 5)) // 🔹 Desplaza los puntos en X
       .attr("cy", (d) => yScale(d.tasksLeft))
       .attr("r", 5)
       .attr("fill", (d) => {
-        if (!d.task) return "#ccc";
-        if (d.task.status === "Completada") return "#10B981";
-        if (d.date < today) return "#EF4444";
-        return "#3B82F6";
+        if (!d.task) return "#ccc"; 
+        if (d.task.status === "Completada") return "#10B981"; 
+        if (d.date < today) return "#EF4444"; 
+        return "#3B82F6"; 
       })
       .attr("stroke", "white");
 
